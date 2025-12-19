@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Templates Emails - GPA Assurance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #ed8936;
+            --accent-color: #2c5282;
+            --text-color: #2d3748;
+            --light-gray: #f7fafc;
+            --medium-gray: #e2e8f0;
+            --dark-gray: #4a5568;
+            --success-color: #38a169;
+            --error-color: #e53e3e;
+            --warning-color: #dd6b20;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .template-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .template-card {
+            background: white;
+            border: 2px solid var(--medium-gray);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .template-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .template-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .template-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .template-subject {
+            font-weight: 500;
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .template-preview {
+            color: var(--text-color);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            max-height: 80px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .template-preview::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(transparent, white);
+        }
+
+        .template-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #12243f;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #c05621;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2f855a;
+        }
+
+        .add-template-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .add-template-btn:hover {
+            transform: scale(1.1);
+            background: #c05621;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark-gray);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--medium-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            margin-top: 0.25rem;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .navigation a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navigation a:hover {
+            color: var(--secondary-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--dark-gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--medium-gray);
+        }
+
+        @media (max-width: 768px) {
+            .template-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-envelope-open-text"></i> Templates Emails</h1>
+            <p>Gérez vos modèles d'emails pour l'envoi de devis</p>
+        </header>
+
+        <div class="content">
+            <div id="templateList" class="template-list">
+                <!-- Les templates seront affichés ici -->
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <h3>Aucun template trouvé</h3>
+                <p>Commencez par créer votre premier template d'email</p>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="email-config.html">
+                <i class="fas fa-arrow-left"></i> Retour à la configuration SMTP
+            </a>
+            <a href="test-pdf-liste.html" style="margin-left: 2rem;">
+                <i class="fas fa-list"></i> Liste des devis
+            </a>
+        </div>
+    </div>
+
+    <button class="add-template-btn" onclick="openModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Modal pour ajouter/modifier un template -->
+    <div id="templateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Nouveau Template</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form id="templateForm">
+                <div class="form-group">
+                    <label for="templateName">Nom du template *</label>
+                    <input type="text" id="templateName" required placeholder="Ex: Devis standard">
+                </div>
+
+                <div class="form-group">
+                    <label for="templateType">Type *</label>
+                    <select id="templateType" required>
+                        <option value="">-- Sélectionner un type --</option>
+                        <option value="devis">Devis</option>
+                        <option value="suivi">Suivi client</option>
+                        <option value="relance">Relance</option>
+                        <option value="confirmation">Confirmation</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="templateSubject">Sujet de l'email *</label>
+                    <input type="text" id="templateSubject" required placeholder="Ex: Votre devis d'assurance auto GPA">
+                </div>
+
+                <div class="form-group">
+                    <label for="templateBody">Corps de l'email *</label>
+                    <textarea id="templateBody" required placeholder="Bonjour {prenom_client} {nom_client},
+
+Vous trouverez ci-joint votre devis d'assurance auto...
+
+Variables disponibles: {nom_client}, {prenom_client}, {devis_id}, {montant}, {date_effet}, {email_client}, {telephone_client}"></textarea>
+                    <div class="help-text">
+                        <i class="fas fa-info-circle"></i>
+                        Variables disponibles : {nom_client}, {prenom_client}, {devis_id}, {montant}, {date_effet}, {email_client}, {telephone_client}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="templateDescription">Description (optionnelle)</label>
+                    <input type="text" id="templateDescription" placeholder="Description courte du template">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Sauvegarder
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let templates = [];
+        let editingTemplateId = null;
+
+        // Templates par défaut
+        const defaultTemplates = [
+            {
+                id: "devis-standard",
+                name: "Devis standard",
+                type: "devis",
+                subject: "Votre devis d'assurance auto - GPA Assurance",
+                body: "Bonjour {prenom_client} {nom_client},\n\nVous trouverez ci-joint votre devis d'assurance auto avec GPA Assurance.\n\nRécapitulatif de votre devis :\n- Référence : {devis_id}\n- Montant : {montant}€/mois\n- Date d'effet : {date_effet}\n\nN'hésitez pas à nous contacter pour toute question.\n\nCordialement,\nL'équipe GPA Assurance",
+                description: "Template standard pour l'envoi de devis",
+                isDefault: true
+            },
+            {
+                id: "devis-urgent",
+                name: "Devis urgent",
+                type: "devis",
+                subject: "URGENT : Votre devis d'assurance auto - GPA Assurance",
+                body: "Bonjour {prenom_client} {nom_client},\n\nSuite à votre demande, voici votre devis d'assurance auto.\n\nOFFRE SPÉCIALE LIMITÉE :\n- Référence : {devis_id}\n- Tarif préférentiel : {montant}€/mois\n- Date d'effet : {date_effet}\n\nCette offre est valable 48h uniquement.\n\nContactez-nous rapidement : {telephone_client}\n\nCordialement,\nL'équipe GPA Assurance",
+                description: "Template pour devis avec urgence",
+                isDefault: true
+            },
+            {
+                id: "suivi-client",
+                name: "Suivi client",
+                type: "suivi",
+                subject: "Suivi de votre devis - GPA Assurance",
+                body: "Bonjour {prenom_client} {nom_client},\n\nJe fais suite à notre dernier échange concernant votre devis {devis_id}.\n\nAvez-vous eu le temps d'étudier notre proposition ?\nJe reste à votre disposition pour répondre à toutes vos questions.\n\nVous pouvez me joindre au {telephone_client}.\n\nBien cordialement,\nL'équipe GPA Assurance",
+                description: "Template pour suivi client",
+                isDefault: true
+            },
+            {
+                id: "relance",
+                name: "Relance devis",
+                type: "relance",
+                subject: "Relance : Votre devis d'assurance auto - GPA Assurance",
+                body: "Bonjour {prenom_client} {nom_client},\n\nJe vous relance concernant votre devis d'assurance auto {devis_id}.\n\nNotre proposition reste valable avec un tarif de {montant}€/mois.\n\nN'hésitez pas à me contacter si vous souhaitez des modifications.\n\nCordialement,\nL'équipe GPA Assurance",
+                description: "Template pour relance de devis",
+                isDefault: true
+            }
+        ];
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTemplates();
+            renderTemplates();
+        });
+
+        // Charger les templates depuis le localStorage
+        function loadTemplates() {
+            const savedTemplates = localStorage.getItem('gpa_email_templates');
+            if (savedTemplates) {
+                templates = JSON.parse(savedTemplates);
+            } else {
+                // Utiliser les templates par défaut
+                templates = [...defaultTemplates];
+                saveTemplates();
+            }
+        }
+
+        // Sauvegarder les templates dans le localStorage
+        function saveTemplates() {
+            localStorage.setItem('gpa_email_templates', JSON.stringify(templates));
+        }
+
+        // Afficher les templates
+        function renderTemplates() {
+            const templateList = document.getElementById('templateList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (templates.length === 0) {
+                templateList.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            templateList.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            templateList.innerHTML = templates.map(template => `
+                <div class="template-card">
+                    <div class="template-header">
+                        <div>
+                            <div class="template-title">${template.name}</div>
+                            <span class="template-type">${getTypeLabel(template.type)}</span>
+                        </div>
+                        ${template.isDefault ? '<i class="fas fa-star" style="color: var(--secondary-color);" title="Template par défaut"></i>' : ''}
+                    </div>
+                    <div class="template-subject">Sujet : ${template.subject}</div>
+                    <div class="template-preview">${template.body.substring(0, 150)}...</div>
+                    <div class="template-actions">
+                        <button class="btn btn-primary" onclick="previewTemplate('${template.id}')">
+                            <i class="fas fa-eye"></i> Aperçu
+                        </button>
+                        <button class="btn btn-secondary" onclick="editTemplate('${template.id}')">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteTemplate('${template.id}')" ${template.isDefault ? 'disabled' : ''}>
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Obtenir le libellé du type
+        function getTypeLabel(type) {
+            const labels = {
+                'devis': 'Devis',
+                'suivi': 'Suivi',
+                'relance': 'Relance',
+                'confirmation': 'Confirmation',
+                'autre': 'Autre'
+            };
+            return labels[type] || type;
+        }
+
+        // Ouvrir le modal
+        function openModal(templateId = null) {
+            const modal = document.getElementById('templateModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('templateForm');
+
+            if (templateId) {
+                const template = templates.find(t => t.id === templateId);
+                if (template) {
+                    modalTitle.textContent = 'Modifier le template';
+                    document.getElementById('templateName').value = template.name;
+                    document.getElementById('templateType').value = template.type;
+                    document.getElementById('templateSubject').value = template.subject;
+                    document.getElementById('templateBody').value = template.body;
+                    document.getElementById('templateDescription').value = template.description || '';
+                    editingTemplateId = templateId;
+                }
+            } else {
+                modalTitle.textContent = 'Nouveau template';
+                form.reset();
+                editingTemplateId = null;
+            }
+
+            modal.classList.add('active');
+        }
+
+        // Fermer le modal
+        function closeModal() {
+            const modal = document.getElementById('templateModal');
+            modal.classList.remove('active');
+            document.getElementById('templateForm').reset();
+            editingTemplateId = null;
+        }
+
+        // Prévisualiser un template
+        function previewTemplate(templateId) {
+            const template = templates.find(t => t.id === templateId);
+            if (!template) return;
+
+            const preview = template.body
+                .replace(/{nom_client}/g, 'DUPONT')
+                .replace(/{prenom_client}/g, 'Jean')
+                .replace(/{devis_id}/g, 'DEV-2024-001')
+                .replace(/{montant}/g, '125.50')
+                .replace(/{date_effet}/g, '01/01/2024')
+                .replace(/{email_client}/g, 'jean.dupont@email.com')
+                .replace(/{telephone_client}/g, '06 12 34 56 78');
+
+            alert(`Aperçu du template "${template.name}":\n\nSujet: ${template.subject}\n\n${preview}`);
+        }
+
+        // Modifier un template
+        function editTemplate(templateId) {
+            openModal(templateId);
+        }
+
+        // Supprimer un template
+        function deleteTemplate(templateId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce template ?')) return;
+
+            templates = templates.filter(t => t.id !== templateId);
+            saveTemplates();
+            renderTemplates();
+        }
+
+        // Gérer la soumission du formulaire
+        document.getElementById('templateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const templateData = {
+                id: editingTemplateId || 'template-' + Date.now(),
+                name: document.getElementById('templateName').value,
+                type: document.getElementById('templateType').value,
+                subject: document.getElementById('templateSubject').value,
+                body: document.getElementById('templateBody').value,
+                description: document.getElementById('templateDescription').value,
+                isDefault: false
+            };
+
+            if (editingTemplateId) {
+                const index = templates.findIndex(t => t.id === editingTemplateId);
+                if (index !== -1) {
+                    templates[index] = templateData;
+                }
+            } else {
+                templates.push(templateData);
+            }
+
+            saveTemplates();
+            renderTemplates();
+            closeModal();
+        });
+
+        // Fermer le modal en cliquant à l'extérieur
+        document.getElementById('templateModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+    <!-- Charger le client d'authentification -->
+    <script src="js/auth-client.js"></script>
+</body>
+</html>
