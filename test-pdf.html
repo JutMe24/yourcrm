@@ -1,0 +1,3557 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Génération de devis - GPA Assurance Auto</title>
+    <!-- Charger jsPDF en premier -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Déclarer la variable globale pour jsPDF
+        window.jspdf = window.jspdf || {};
+        window.jsPDF = window.jspdf.jsPDF;
+    </script>
+    <!-- Charger le générateur de devis corrigé -->
+    <script src="devis-generator-fixed.js"></script>
+    <!-- Charger le client d'authentification -->
+    <script src="js/auth-client.js"></script>
+    <!-- Police Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;    /* Bleu marine */
+            --secondary-color: #ed8936;  /* Orange */
+            --accent-color: #2c5282;     /* Bleu plus clair */
+            --text-color: #2d3748;
+            --light-gray: #f7fafc;
+            --medium-gray: #e2e8f0;
+            --dark-gray: #4a5568;
+            --success-color: #38a169;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --footer-bg: #1a1a2e;
+            --footer-text: #f0f0f0;
+            --footer-link: #a0aec0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #f6f9fc 0%, #f0f4f8 100%);
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-header {
+            background: white;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo {
+            background: var(--primary-color);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .company-info h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            line-height: 1.2;
+        }
+        
+        .company-info p {
+            margin: 0.2rem 0 0;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+        
+        .contact-info {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .contact-info .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            color: var(--footer-link);
+        }
+        
+        .contact-info .contact-item i {
+            color: var(--secondary-color);
+            background: rgba(237, 137, 54, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .contact-info .contact-item h4 {
+            color: white;
+            margin: 0 0 0.2rem;
+            font-size: 1rem;
+        }
+        
+        .contact-info .contact-item a,
+        .contact-info .contact-item p {
+            color: var(--footer-link);
+            text-decoration: none;
+            margin: 0;
+            line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+        
+        .contact-info .contact-item a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .contact-info .contact-item small {
+            display: block;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 0.2rem;
+        }
+        
+        .opening-hours {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            color: var(--footer-link);
+        }
+        
+        .opening-hours i {
+            color: var(--secondary-color);
+            background: rgba(237, 137, 54, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .opening-hours h4 {
+            color: white;
+            margin: 0 0 0.2rem;
+            font-size: 1rem;
+        }
+        
+        .opening-hours p {
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .contact-item i {
+            color: var(--secondary-color);
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-nav {
+            background: var(--primary-color);
+            padding: 0 1rem;
+        }
+        
+        .main-nav ul {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            gap: 1px;
+        }
+        
+        .main-nav li {
+            padding: 1rem 1.5rem;
+            color: white;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .main-nav li:hover,
+        .main-nav li.active {
+            background: var(--secondary-color);
+        }
+        
+        .main-nav li i {
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            flex: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin: 2.5rem 0;
+            padding: 2rem 0;
+            position: relative;
+            background: linear-gradient(135deg, rgba(26, 54, 93, 0.05) 0%, rgba(237, 137, 54, 0.05) 100%);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header-subtitle {
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .form-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 2.5rem;
+            margin-top: 1rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        h2.section-title {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group label i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+            width: 20px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-gray);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.2);
+        }
+
+        button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 1.5rem 0;
+            width: 100%;
+            max-width: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .section {
+            background-color: white;
+            padding: 1.8rem;
+            border-radius: 10px;
+            margin-bottom: 1.8rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .section:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            position: relative;
+            padding-left: 2rem;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 24px;
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .section-title i {
+            margin-right: 0.8rem;
+            color: var(--secondary-color);
+            font-size: 1.2em;
+        }
+
+        /* Styles pour les champs de formulaire */
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        
+        .input-with-symbol {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-symbol {
+            position: absolute;
+            right: 10px;
+            color: #6c757d;
+        }
+        
+        .form-group input[type="number"] {
+            padding-right: 30px;
+        }
+        
+        .select-wrapper::after {
+            content: '\f107';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--primary-color);
+        }
+
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 2.5rem !important;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        /* Styles pour les checkboxes personnalisées */
+        .checkbox-container {
+            margin: 1rem 0;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .checkbox-input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkbox-custom {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid var(--medium-gray);
+            border-radius: 4px;
+            margin-right: 10px;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox-input:checked ~ .checkbox-custom {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .checkbox-input:checked ~ .checkbox-custom::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+        }
+
+        .checkbox-text {
+            line-height: 1.4;
+        }
+
+        /* Styles pour le bouton principal */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-ajouter {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+        
+        .btn-ajouter:hover {
+            background: #d17a2e;
+            transform: translateY(-1px);
+        }
+        
+        .conducteur-supplementaire {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .btn-primary, .btn-test {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26, 54, 93, 0.2);
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 0.5rem auto;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #d17a2e);
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(237, 137, 54, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 0.5rem auto;
+            text-align: center;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.3);
+            background: linear-gradient(135deg, #d17a2e, var(--secondary-color));
+        }
+        
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary i {
+            font-size: 1.2em;
+        }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            color: white;
+        }
+        
+        .btn-test:hover {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 54, 93, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 54, 93, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary i {
+            font-size: 1.2em;
+        }
+
+        /* Styles pour le texte d'information */
+        .text-muted {
+            color: var(--dark-gray);
+            opacity: 0.8;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .text-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .text-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        /* Styles pour les champs de formulaire */
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            padding: 1rem !important;
+            line-height: 1.5;
+        }
+
+        /* Animation de chargement */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        /* Styles pour le pied de page */
+        .main-footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 2rem 1rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .footer-section {
+            flex: 1;
+            margin: 1rem;
+        }
+
+        .footer-section h3 {
+            color: var(--footer-text);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: var(--footer-link);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary-color);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-link {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: var(--footer-bg);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--footer-text);
+            transition: background-color 0.2s ease;
+        }
+
+        .social-link:hover {
+            background-color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .legal-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .legal-links a {
+            color: var(--footer-link);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .legal-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Styles pour le pied de page premium */
+        .main-footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            position: relative;
+            margin-top: 5rem;
+            font-size: 0.95rem;
+            overflow: hidden;
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer-wave {
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+        }
+        
+        .footer-wave svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 60px;
+        }
+
+        /* Section newsletter */
+        .footer-newsletter {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            padding: 2.5rem 1rem;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer-newsletter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==');
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .newsletter-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        
+        .newsletter-text h3 {
+            color: white;
+            margin: 0 0 0.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .newsletter-text h3 i {
+            color: var(--secondary-color);
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .newsletter-text p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            font-size: 1.05rem;
+        }
+        
+        .newsletter-form {
+            display: flex;
+            flex: 1;
+            max-width: 600px;
+            min-width: 300px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+        
+        .newsletter-form input {
+            flex: 1;
+            padding: 0 1.5rem;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .btn-subscribe {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-subscribe:hover {
+            background: #e07b1f;
+            transform: translateY(-1px);
+        }
+        
+        /* Contenu principal du footer */
+        .footer-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            padding: 4rem 2rem;
+            position: relative;
+        }
+        
+        .footer-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 5%;
+            right: 5%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        /* Sections du footer */
+        .footer-section {
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .about-us {
+            grid-column: 1 / -1;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-logo .logo {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(237, 137, 54, 0.3);
+        }
+        
+        .footer-logo h3 {
+            margin: 0;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .company-description {
+            color: var(--footer-link);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+        
+        .trustpilot-widget {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .trustpilot-stars {
+            color: #00b67a;
+        }
+        
+        .trustpilot-widget span {
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .footer-title {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--secondary-color);
+            border-radius: 3px;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--secondary-color);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .footer-links li:hover {
+            transform: translateX(5px);
+        }
+        
+        .footer-links a {
+            color: var(--footer-link);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            padding: 0.3rem 0;
+        }
+        
+        .footer-links a i {
+            color: var(--secondary-color);
+            font-size: 0.7rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+        
+        .footer-links a:hover i {
+            transform: translateX(3px);
+        }
+
+        .footer-section a:hover {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .social-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+        
+        .social-link i {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .social-link:hover::before {
+            opacity: 1;
+        }
+        
+        .social-link:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .social-link:hover {
+            background: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem 2rem;
+            position: relative;
+        }
+        
+        .footer-bottom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 5%;
+            right: 5%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+        
+        .footer-bottom-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .payment-methods {
+            display: flex;
+            gap: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5rem;
+        }
+        
+        .payment-methods i {
+            transition: all 0.3s ease;
+        }
+        
+        .payment-methods i:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .legal-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .legal-links span {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 0.8rem;
+        }
+
+        .legal-links a {
+            color: var(--footer-link);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .legal-links a:hover {
+            color: var(--secondary-color);
+        }
+
+        /* Bouton retour en haut */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 999;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .back-to-top:hover {
+            background: var(--primary-color);
+            transform: translateY(-5px) !important;
+        }
+        
+        /* Styles responsifs */
+        @media (max-width: 1200px) {
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+                padding: 3rem 1.5rem;
+            }
+            
+            .about-us {
+                grid-column: 1 / -1;
+            }
+            
+            .newsletter-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .newsletter-form {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                padding: 2rem 1rem;
+            }
+            
+            .footer-section {
+                text-align: center;
+            }
+            
+            .footer-title::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .footer-links li:hover {
+                transform: none;
+            }
+            
+            .footer-links a {
+                justify-content: center;
+            }
+            
+            .contact-info .contact-item,
+            .opening-hours {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .footer-bottom-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .payment-methods,
+            .legal-links {
+                justify-content: center;
+            }
+            
+            .back-to-top {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .newsletter-form {
+                flex-direction: column;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            .newsletter-form input,
+            .btn-subscribe {
+                padding: 1rem;
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+            
+            .btn-subscribe {
+                border-radius: 0 0 8px 8px;
+            }
+            
+            .legal-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .legal-links span {
+                display: none;
+            }
+        }
+
+        /* Styles pour le titre du formulaire */
+        .form-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .form-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        /* Barre de navigation */
+        .main-nav {
+            background: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+        }
+
+        .nav-link {
+            display: inline-block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            opacity: 0.8;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+
+        .nav-link.active {
+            opacity: 1;
+            border-bottom-color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* Styles pour le serveur SMTP */
+        .server-running {
+            color: #28a745 !important;
+            background-color: rgba(40, 167, 69, 0.1) !important;
+        }
+        
+        .server-stopped {
+            color: #dc3545 !important;
+            background-color: rgba(220, 53, 69, 0.1) !important;
+        }
+        
+        .server-starting {
+            color: #ffc107 !important;
+            background-color: rgba(255, 193, 7, 0.1) !important;
+        }
+        
+        .btn-success {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="test-pdf.html" class="nav-link active">Nouveau devis</a>
+            <a href="test-pdf-liste.html" class="nav-link">Liste des devis</a>
+            <a href="parametres.html" class="nav-link" id="parametresLink" style="display: none;">Paramètres</a>
+            <div class="nav-controls" style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
+                <div id="smtp-controls" style="display: none;">
+                    <button id="smtp-server-btn" class="btn btn-sm btn-secondary" style="padding: 6px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; background-color: #6c757d; color: white; display: flex; align-items: center; gap: 3px;">
+                        <i class="fas fa-server"></i> <span id="smtp-server-text">Démarrer le serveur SMTP</span>
+                    </button>
+                    <span id="smtp-server-status" class="server-status" style="font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px; color: #dc3545; background-color: rgba(220, 53, 69, 0.1);">● Arrêté</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-header">
+            <h1 class="form-title">Demande de devis assurance auto</h1>
+            <p class="form-subtitle">Remplissez ce formulaire pour obtenir votre devis personnalisé en quelques minutes</p>
+        </div>
+        
+        <div class="form-container">
+            <!-- Section Informations conducteur -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-user"></i> Informations conducteur
+                    </h2>
+                    <button type="button" id="ajouterConducteur" class="btn-ajouter" title="Ajouter un deuxième conducteur">
+                        <i class="fas fa-plus-circle"></i> Ajouter un conducteur
+                    </button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nom"><i class="fas fa-user-tag"></i> Nom *</label>
+                        <input type="text" id="nom" required placeholder="Votre nom">
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom"><i class="fas fa-user"></i> Prénom *</label>
+                        <input type="text" id="prenom" required placeholder="Votre prénom">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adresse"><i class="fas fa-map-marker-alt"></i> Adresse *</label>
+                    <input type="text" id="adresse" required placeholder="Votre adresse complète">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="codePostal"><i class="fas fa-mail-bulk"></i> Code postal *</label>
+                        <input type="text" id="codePostal" required placeholder="75000">
+                    </div>
+                    <div class="form-group">
+                        <label for="ville"><i class="fas fa-city"></i> Ville *</label>
+                        <input type="text" id="ville" required placeholder="Votre ville">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telephone"><i class="fas fa-phone"></i> Téléphone *</label>
+                        <input type="tel" id="telephone" required placeholder="06 12 34 56 78">
+                    </div>
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email *</label>
+                        <input type="email" id="email" required placeholder="votre@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateNaissance"><i class="fas fa-birthday-cake"></i> Date de naissance *</label>
+                        <input type="date" id="dateNaissance" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="situationFamiliale"><i class="fas fa-users"></i> Situation familiale *</label>
+                        <select id="situationFamiliale" required class="form-control">
+                            <option value="">Sélectionnez une option</option>
+                            <option value="celibataire">Célibataire</option>
+                            <option value="marie">Marié(e)</option>
+                            <option value="pacs">Pacsé(e)</option>
+                            <option value="divorce">Divorcé(e)</option>
+                            <option value="veuf">Veuf/Veuve</option>
+                            <option value="concubinage">En concubinage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profession"><i class="fas fa-briefcase"></i> Profession *</label>
+                        <input type="text" id="profession" required placeholder="Votre profession" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="datePermis"><i class="fas fa-id-card"></i> Date d'obtention du permis *</label>
+                        <input type="date" id="datePermis" required class="form-control">
+                    </div>
+                </div>
+                
+                <!-- Section Deuxième conducteur (masquée par défaut) -->
+                <div id="deuxiemeConducteur" class="conducteur-supplementaire" style="display: none;">
+                    <div class="section-header">
+                        <h3 class="section-subtitle">
+                            <i class="fas fa-user-friends"></i> Deuxième conducteur
+                        </h3>
+                        <button type="button" class="btn-supprimer" id="supprimerConducteur" title="Supprimer ce conducteur">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom2"><i class="fas fa-user-tag"></i> Nom *</label>
+                            <input type="text" id="nom2" name="nom2" placeholder="Nom du deuxième conducteur">
+                        </div>
+                        <div class="form-group">
+                            <label for="prenom2"><i class="fas fa-user"></i> Prénom *</label>
+                            <input type="text" id="prenom2" name="prenom2" placeholder="Prénom du deuxième conducteur">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateNaissance2"><i class="fas fa-birthday-cake"></i> Date de naissance *</label>
+                            <input type="date" id="dateNaissance2" name="dateNaissance2" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="situationFamiliale2"><i class="fas fa-users"></i> Situation familiale *</label>
+                            <select id="situationFamiliale2" name="situationFamiliale2" required>
+                                <option value="">Sélectionnez une option</option>
+                                <option value="celibataire">Célibataire</option>
+                                <option value="marie">Marié(e)</option>
+                                <option value="pacs">Pacsé(e)</option>
+                                <option value="divorce">Divorcé(e)</option>
+                                <option value="veuf">Veuf/Veuve</option>
+                                <option value="concubinage">En concubinage</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="profession2"><i class="fas fa-briefcase"></i> Profession *</label>
+                            <input type="text" id="profession2" name="profession2" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="datePermis2"><i class="fas fa-id-card"></i> Date d'obtention du permis *</label>
+                            <input type="date" id="datePermis2" name="datePermis2" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Détails du véhicule -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-car"></i> Détails du véhicule
+                </h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="marque"><i class="fas fa-tag"></i> Marque *</label>
+                        <input type="text" id="marque" required placeholder="Ex: Renault">
+                    </div>
+                    <div class="form-group">
+                        <label for="modele"><i class="fas fa-car-side"></i> Modèle *</label>
+                        <input type="text" id="modele" required placeholder="Ex: Clio">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="annee"><i class="fas fa-calendar-alt"></i> Année *</label>
+                        <input type="number" id="annee" min="1900" max="2025" required placeholder="2023">
+                    </div>
+                    <div class="form-group">
+                        <label for="immatriculation"><i class="fas fa-id-card"></i> Immatriculation *</label>
+                        <input type="text" id="immatriculation" required placeholder="AA-123-AA">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="puissance"><i class="fas fa-tachometer-alt"></i> Puissance fiscale (CV) *</label>
+                        <input type="number" id="puissance" min="1" max="50" required placeholder="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="carburant"><i class="fas fa-gas-pump"></i> Type de carburant *</label>
+                        <select id="carburant" name="carburant" required class="form-control">
+                            <option value="">Sélectionnez un type de carburant</option>
+                            <option value="essence">Essence</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="electrique">Électrique</option>
+                            <option value="hybride">Hybride</option>
+                            <option value="gpl">GPL</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateMiseCirculation"><i class="fas fa-calendar-check"></i> Date de 1ère mise en circulation *</label>
+                        <input type="date" id="dateMiseCirculation" name="dateMiseCirculation" required class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="stationnement"><i class="fas fa-parking"></i> Type de stationnement la nuit *</label>
+                    <select id="stationnement" name="stationnement" required class="form-control">
+                        <option value="">Sélectionnez un type de stationnement</option>
+                        <option value="box">Box/garage fermé</option>
+                        <option value="terrain_prive">Terrain privé</option>
+                        <option value="parking_collectif">Parking collectif</option>
+                        <option value="voie_publique" selected>Voie publique</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="usage"><i class="fas fa-road"></i> Usage du véhicule *</label>
+                    <select id="usage" name="usage" required class="form-control">
+                        <option value="">Sélectionnez un usage</option>
+                        <option value="prive" selected>Usage privé</option>
+                        <option value="travail">Trajet domicile-travail</option>
+                        <option value="tous_deplacements">Tous déplacements (professionnels et privés)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Section Options d'assurance -->
+            <!-- Section Antécédents d'assurance -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i> Antécédents d'assurance
+                </h2>
+                
+                <div class="form-group">
+                    <label for="dejaAssure">Avez-vous déjà été assuré ?</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="dejaAssure" value="oui" id="dejaAssureOui">
+                            <span class="radio-custom"></span>
+                            Oui
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="dejaAssure" value="non" id="dejaAssureNon" checked>
+                            <span class="radio-custom"></span>
+                            Non
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Champs conditionnels si déjà assuré -->
+                <div id="infoAncienneAssurance" style="display: none;">
+                    <div class="form-group">
+                        <label for="moisAssurance">Nombre de mois d'assurances sur les 36 derniers mois</label>
+                        <input type="number" id="moisAssurance" name="moisAssurance" min="1" max="36" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bonusMalus">Votre coefficient bonus/malus actuel</label>
+                        <input type="number" id="bonusMalus" name="bonusMalus" step="0.01" min="0.5" max="3.5" value="1.00" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Avez-vous eu des sinistres au cours des 5 dernières années ?</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="aEuSinistres" value="oui" id="aEuSinistresOui">
+                                <span class="radio-custom"></span>
+                                Oui
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="aEuSinistres" value="non" id="aEuSinistresNon" checked>
+                                <span class="radio-custom"></span>
+                                Non
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="sinistresContainer" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <div class="form-group">
+                            <label for="nombreSinistres">Nombre de sinistres</label>
+                            <select id="nombreSinistres" class="form-control">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5 ou plus</option>
+                            </select>
+                        </div>
+                        
+                        <div id="listeSinistres">
+                            <!-- Les champs de sinistres seront ajoutés ici dynamiquement -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Situation de votre contrat actuel</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="situationContrat" value="enCours" checked>
+                                <span class="radio-custom"></span>
+                                Contrat en cours
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="situationContrat" value="resilier">
+                                <span class="radio-custom"></span>
+                                Contrat résilié
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="infoResiliation" style="display: none; margin-top: 1rem; padding: 1rem; background: #fff3f0; border-radius: 8px; border-left: 4px solid var(--secondary-color);">
+                        <div class="form-group">
+                            <label for="dateResiliation">Date de résiliation</label>
+                            <input type="date" id="dateResiliation" name="dateResiliation" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="motifResiliation">Motif de résiliation</label>
+                            <select id="motifResiliation" name="motifResiliation" class="form-control">
+                                <option value="">Sélectionnez un motif</option>
+                                <option value="changementAssureur">Changement d'assureur</option>
+                                <option value="venteVehicule">Vente du véhicule</option>
+                                <option value="nonRenouvellement">Non-renouvellement</option>
+                                <option value="modificationSituation">Changement de situation</option>
+                                <option value="resiliationNonPaiement">Résiliation pour non-paiement</option>
+                                <option value="resiliationSinistres">Résiliation pour sinistres</option>
+                                <option value="resiliationManqueDocument">Résiliation pour manque de documents</option>
+                                <option value="autre">Autre motif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- Champs conditionnels pour résiliation -->
+                    <div id="infoResiliation" style="display: none;">
+                        <div class="form-group">
+                            <label for="dateResiliation">Date de résiliation</label>
+                            <input type="date" id="dateResiliation" name="dateResiliation" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="motifResiliation">Motif de résiliation</label>
+                            <select id="motifResiliation" name="motifResiliation" class="form-control">
+                                <option value="">Sélectionnez un motif</option>
+                                <option value="changementAssureur">Changement d'assureur</option>
+                                <option value="venteVehicule">Vente du véhicule</option>
+                                <option value="nonRenouvellement">Non-renouvellement</option>
+                                <option value="modificationSituation">Changement de situation</option>
+                                <option value="resiliationNonPaiement">Résiliation pour non-paiement</option>
+                                <option value="resiliationSinistres">Résiliation pour sinistres</option>
+                                <option value="resiliationManqueDocument">Résiliation pour manque de documents</option>
+                                <option value="autre">Autre motif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Proposition -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-file-contract"></i> Proposition
+                </h2>
+                
+                <div class="form-group">
+                    <label for="typeAssurance"><i class="fas fa-clipboard-check"></i> Type d'assurance *</label>
+                    <div class="select-wrapper">
+                        <select id="typeAssurance" required>
+                            <option value="" disabled selected>Sélectionnez un type d'assurance</option>
+                            <option value="tous_risques">Tous risques - Protection complète</option>
+                            <option value="tiers">Tiers - Couverture minimale légale</option>
+                            <option value="tiers_vol_incendie">Tiers, vol et incendie - Protection intermédiaire</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fractionnement"><i class="fas fa-calendar-alt"></i> Fractionnement *</label>
+                        <div class="select-wrapper">
+                            <select id="fractionnement" required>
+                                <option value="mensuel">Mensuel</option>
+                                <option value="trimestriel">Trimestriel</option>
+                                <option value="semestriel">Semestriel</option>
+                                <option value="annuel" selected>Annuel</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="assistance" name="assistance" value="assistance_0km">
+                            <label for="assistance"><i class="fas fa-ambulance"></i> Assistance 0km (+12,50€/mois)</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cotisation"><i class="fas fa-euro-sign"></i> Montant de la cotisation *</label>
+                        <div class="input-with-symbol">
+                            <input type="number" id="cotisation" name="cotisation" min="0" step="0.01" required class="form-control" placeholder="0,00">
+                            <span class="input-symbol">€</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fraisDossier"><i class="fas fa-file-invoice"></i> Frais de dossier *</label>
+                        <div class="input-with-symbol">
+                            <input type="number" id="fraisDossier" name="fraisDossier" min="0" step="0.01" value="20.00" required class="form-control">
+                            <span class="input-symbol">€</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateEffet"><i class="far fa-calendar-alt"></i> Date d'effet souhaitée *</label>
+                    <input type="date" id="dateEffet" required min="">
+                </div>
+            </div>
+
+            <!-- Section Commentaires -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-comments"></i> Commentaires supplémentaires
+                </h2>
+                <div class="form-group">
+                    <label for="commentaires"><i class="fas fa-edit"></i> Avez-vous des demandes particulières ?</label>
+                    <textarea id="commentaires" rows="4" placeholder="Précisez ici toute information complémentaire ou demande particulière..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-container">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="conditions" class="checkbox-input" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">J'accepte les <a href="#" class="text-link">conditions générales</a> et la <a href="#" class="text-link">politique de confidentialité</a> *</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                    <button type="button" id="remplirTest" class="btn-test">
+                        <i class="fas fa-vial"></i> Remplir avec des données de test
+                    </button>
+                    <div class="buttons-row" style="display: flex; gap: 1rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+                        <button type="button" id="enregistrerModifications" class="btn btn-secondary">
+                            <i class="fas fa-save"></i> Enregistrer les modifications
+                        </button>
+                        <button type="button" id="genererDevis" class="btn btn-primary">
+                            <i class="fas fa-file-pdf"></i> Générer mon devis
+                        </button>
+                    </div>
+                </div>
+                
+                <p class="text-muted text-center">
+                    <small>Vos informations sont sécurisées et ne seront pas partagées sans votre accord.</small>
+                </p>
+            </div>
+
+    <script>
+        // Fonction utilitaire pour ajouter une prestation
+        function ajouterPrestation(prestation = {}) {
+            const container = document.getElementById('prestationsContainer');
+            const template = document.getElementById('prestationTemplate');
+            
+            if (template && container) {
+                const clone = document.importNode(template.content, true);
+                const inputs = clone.querySelectorAll('input');
+                
+                inputs.forEach(input => {
+                    if (input.name === 'prestationLibelle[]') {
+                        input.value = prestation.libelle || '';
+                    } else if (input.name === 'prixUnitaire[]') {
+                        input.value = prestation.prixUnitaire || '';
+                    } else if (input.name === 'quantite[]') {
+                        input.value = prestation.quantite || 1;
+                    }
+                });
+                
+                // Ajouter un gestionnaire d'événements pour le bouton de suppression
+                const deleteBtn = clone.querySelector('.delete-prestation');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', function() {
+                        this.closest('.prestation-item').remove();
+                        if (typeof calculerTotal === 'function') {
+                            calculerTotal();
+                        }
+                    });
+                }
+                
+                container.appendChild(clone);
+                
+                // Mettre à jour les totaux si une nouvelle prestation est ajoutée
+                if (typeof calculerTotal === 'function') {
+                    calculerTotal();
+                }
+                
+                return container.lastElementChild; // Retourne l'élément ajouté
+            }
+            return null;
+        }
+        
+        // Fonction pour charger un devis existant
+        async function chargerDevisExistant(devisId) {
+            console.log('=== DÉBUT chargerDevisExistant ===');
+            console.log('devisId reçu:', devisId);
+            
+            try {
+                // Récupérer la liste des devis
+                const devisListe = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                console.log('Nombre de devis dans localStorage:', devisListe.length);
+                console.log('Liste des IDs disponibles:', devisListe.map(d => d.id));
+                
+                const devis = devisListe.find(d => d.id === devisId);
+                console.log('Devis trouvé:', devis ? 'OUI' : 'NON');
+                
+                if (!devis) {
+                    console.error('Devis non trouvé pour l\'ID:', devisId);
+                    return;
+                }
+
+                console.log('Données du devis à charger:', devis);
+                
+                // Mettre à jour le titre
+                const titre = document.querySelector('.form-title');
+                if (titre) {
+                    titre.textContent = 'Modifier un devis existant';
+                }
+                
+                // Fonction utilitaire pour remplir un champ en toute sécurité
+                function setFieldValue(id, value) {
+                    const field = document.getElementById(id);
+                    if (field) {
+                        field.value = value || '';
+                        console.log(`Champ ${id} rempli avec:`, value || '');
+                    } else {
+                        console.log(`Champ ${id} non trouvé`);
+                    }
+                }
+                
+                // Fonction utilitaire pour cocher une case
+                function setCheckboxValue(id, checked) {
+                    const field = document.getElementById(id);
+                    if (field) {
+                        field.checked = !!checked;
+                        console.log(`Checkbox ${id} cochée:`, !!checked);
+                    } else {
+                        console.log(`Checkbox ${id} non trouvée`);
+                    }
+                }
+                
+                // Fonction utilitaire pour sélectionner un radio
+                function setRadioValue(name, value) {
+                    const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        console.log(`Radio ${name} sélectionné avec:`, value);
+                    } else {
+                        console.log(`Radio ${name} avec valeur ${value} non trouvé`);
+                    }
+                }
+                
+                // Remplir les champs du client
+                if (devis.client) {
+                    console.log('Chargement des informations client:', devis.client);
+                    setFieldValue('nom', devis.client.nom);
+                    setFieldValue('prenom', devis.client.prenom);
+                    setFieldValue('dateNaissance', devis.client.dateNaissance);
+                    setFieldValue('adresse', devis.client.adresse);
+                    setFieldValue('codePostal', devis.client.codePostal);
+                    setFieldValue('ville', devis.client.ville);
+                    setFieldValue('telephone', devis.client.telephone);
+                    setFieldValue('email', devis.client.email);
+                }
+                
+                // Remplir les champs du permis
+                if (devis.permis) {
+                    console.log('Chargement des informations permis:', devis.permis);
+                    setFieldValue('permisNumero', devis.permis.numero);
+                    setFieldValue('datePermis', devis.permis.dateObtention); // ID correct
+                    setFieldValue('permisDelivrePar', devis.permis.delivrePar);
+                } else if (devis.client) {
+                    // Essayer de trouver les infos du permis dans les données client
+                    setFieldValue('permisNumero', devis.client.permisNumero);
+                    setFieldValue('datePermis', devis.client.permisDateObtention); // ID correct
+                    setFieldValue('permisDelivrePar', devis.client.permisDelivrePar);
+                }
+                
+                // Remplir la situation familiale et autres champs client
+                if (devis.client) {
+                    setFieldValue('situationFamiliale', devis.client.situationFamiliale);
+                    setFieldValue('nombreEnfants', devis.client.nombreEnfants);
+                    setFieldValue('profession', devis.client.profession);
+                }
+                
+                // Remplir les champs du véhicule
+                if (devis.vehicule) {
+                    console.log('Chargement des informations véhicule:', devis.vehicule);
+                    setFieldValue('marque', devis.vehicule.marque);
+                    setFieldValue('modele', devis.vehicule.modele);
+                    setFieldValue('annee', devis.vehicule.annee);
+                    setFieldValue('puissance', devis.vehicule.puissance);
+                    setFieldValue('immatriculation', devis.vehicule.immatriculation);
+                    setFieldValue('dateMiseCirculation', devis.vehicule.dateMec); // ID correct
+                    setFieldValue('energie', devis.vehicule.energie);
+                    setFieldValue('usage', devis.vehicule.usage);
+                    setFieldValue('carburant', devis.vehicule.carburant);
+                }
+                
+                // Remplir les options et garanties
+                if (devis.options) {
+                    console.log('Chargement des options:', devis.options);
+                    setCheckboxValue('assistance', devis.options.assistance);
+                    setCheckboxValue('protectionJuridique', devis.options.protectionJuridique);
+                    setCheckboxValue('vehiculeRemplacement', devis.options.vehiculeRemplacement);
+                    setCheckboxValue('brisGlace', devis.options.brisGlace);
+                }
+                
+                // Remplir les informations complémentaires
+                const infos = devis.infosComplementaires || {};
+                console.log('Chargement des informations complémentaires:', infos);
+                console.log('Données brutes - typeAssurance:', devis.typeAssurance, 'infos.typeAssurance:', infos.typeAssurance, 'devis.formule:', devis.formule);
+                console.log('Données brutes - fractionnement:', devis.fractionnement, 'infos.fractionnement:', infos.fractionnement);
+                
+                // Type d'assurance - PRIORITÉ: infosComplementaires (le plus récent) puis devis.typeAssurance puis devis.formule
+                const typeAssurance = infos.typeAssurance || devis.typeAssurance || devis.formule;
+                if (typeAssurance) {
+                    console.log('Chargement type d\'assurance avec valeur:', typeAssurance);
+                    setFieldValue('typeAssurance', typeAssurance); // Corrigé: select pas radio
+                } else {
+                    console.log('Aucun type d\'assurance trouvé');
+                }
+                
+                // Fractionnement - PRIORITÉ: infosComplementaires (le plus récent) puis devis.fractionnement
+                const fractionnement = infos.fractionnement || devis.fractionnement || 'Mensuel';
+                console.log('Chargement fractionnement avec valeur:', fractionnement);
+                setFieldValue('fractionnement', fractionnement); // Corrigé: select pas radio
+                
+                // Date d'effet
+                const dateEffet = devis.dateEffet || infos.dateEffet;
+                setFieldValue('dateEffet', dateEffet);
+                
+                // Cotisation et frais - PRIORITÉ: infosComplementaires (le plus récent) puis devis.cotisation
+                const cotisation = infos.cotisation || devis.cotisation || 0;
+                const fraisDossier = infos.fraisDossier || devis.fraisDossier || 0;
+                console.log('Chargement cotisation avec valeur:', cotisation, '(priorité: infos.cotisation:', infos.cotisation, 'puis devis.cotisation:', devis.cotisation, ')');
+                console.log('Chargement fraisDossier avec valeur:', fraisDossier, '(priorité: infos.fraisDossier:', infos.fraisDossier, 'puis devis.fraisDossier:', devis.fraisDossier, ')');
+                setFieldValue('cotisation', cotisation);
+                setFieldValue('fraisDossier', fraisDossier);
+                
+                // Remplir les prestations
+                const container = document.getElementById('prestationsContainer');
+                if (devis.prestations && container) {
+                    container.innerHTML = ''; // Vider les prestations existantes
+                    
+                    devis.prestations.forEach((prestation, index) => {
+                        if (index === 0) {
+                            // Utiliser les champs existants pour la première prestation
+                            setFieldValue('prestationLibelle', prestation.libelle);
+                            setFieldValue('prixUnitaire', prestation.prixUnitaire);
+                            setFieldValue('quantite', prestation.quantite || 1);
+                        } else {
+                            // Ajouter des champs supplémentaires pour les prestations suivantes
+                            ajouterPrestation(prestation);
+                        }
+                    });
+                }
+                
+                // Remplir les antécédents d'assurance
+                console.log('=== DEBUG CHARGEMENT ANTÉCÉDENTS ===');
+                console.log('devis.antecedentsAssurance:', devis.antecedentsAssurance);
+                console.log('devis.antecedents:', devis.antecedents);
+                
+                // Priorité aux données les plus récentes : antecedentsAssurance (nouveau format) puis antecedents (ancien format)
+                const antecedents = devis.antecedentsAssurance || devis.antecedents;
+                
+                console.log('Données antecedentsAssurance:', devis.antecedentsAssurance);
+                console.log('Données antecedents:', devis.antecedents);
+                console.log('Données finales utilisées:', antecedents);
+                
+                if (antecedents) {
+                    console.log('Chargement des antécédents:', antecedents);
+                    console.log('dejaAssure:', antecedents.dejaAssure);
+                    
+                    // Sélectionner le radio correct selon la valeur sauvegardée
+                    if (antecedents.dejaAssure === true) {
+                        setRadioValue('dejaAssure', 'oui');
+                    } else {
+                        setRadioValue('dejaAssure', 'non');
+                    }
+                    
+                    setFieldValue('ancienAssureur', antecedents.ancienAssureur || '');
+                    
+                    // Gérer la date de résiliation selon la structure
+                    const dateResiliation = antecedents.resiliation?.date || antecedents.dateResiliation || '';
+                    setFieldValue('dateResiliation', dateResiliation);
+                    
+                    // Charger les autres champs si ils existent
+                    if (antecedents.moisAssurance !== undefined) {
+                        setFieldValue('moisAssurance', antecedents.moisAssurance);
+                    }
+                    if (antecedents.bonusMalus !== undefined) {
+                        setFieldValue('bonusMalus', antecedents.bonusMalus);
+                    }
+                    if (antecedents.situationContrat) {
+                        setRadioValue('situationContrat', antecedents.situationContrat);
+                    }
+                    if (antecedents.resiliation?.motif) {
+                        setFieldValue('motifResiliation', antecedents.resiliation.motif);
+                    }
+                    if (antecedents.aEuSinistres !== undefined) {
+                        setRadioValue('aEuSinistres', antecedents.aEuSinistres ? 'oui' : 'non');
+                        console.log('🔍 === CHARGEMENT SINISTRES - APPROCHE SIMPLE ===');
+                        console.log('aEuSinistres:', antecedents.aEuSinistres);
+                        console.log('sinisters trouvés:', antecedents.sinisters);
+                        
+                        // Si des sinistres existent, les reconstituer simplement
+                        if (antecedents.aEuSinistres && antecedents.sinisters && antecedents.sinisters.length > 0) {
+                            console.log('🔄 Reconstitution de', antecedents.sinisters.length, 'sinistres');
+                            
+                            // Définir le nombre de sinistres
+                            const nombreField = document.getElementById('nombreSinistres');
+                            if (nombreField) {
+                                nombreField.value = antecedents.sinisters.length;
+                                console.log('✅ Nombre de sinistres défini à:', antecedents.sinisters.length);
+                                
+                                // Déclencher l'événement change pour créer les champs
+                                nombreField.dispatchEvent(new Event('change'));
+                                console.log('🔄 Événement change déclenché');
+                                
+                                // Remplir les champs après un délai
+                                setTimeout(() => {
+                                    console.log('🔄 Début du remplissage des champs');
+                                    antecedents.sinisters.forEach((sinistre, index) => {
+                                        const i = index + 1; // Indices commencent à 1
+                                        console.log(`🔄 Remplissage sinistre ${i}:`, sinistre);
+                                        
+                                        // Remplir la date
+                                        if (sinistre.date) {
+                                            const dateField = document.getElementById(`sinistreDate${i}`);
+                                            if (dateField) {
+                                                dateField.value = sinistre.date;
+                                                console.log(`✅ Date ${i} remplie:`, sinistre.date);
+                                            } else {
+                                                console.log(`❌ Champ date ${i} non trouvé`);
+                                            }
+                                        }
+                                        
+                                        // Remplir la nature
+                                        if (sinistre.nature) {
+                                            const natureField = document.getElementById(`sinistreNature${i}`);
+                                            if (natureField) {
+                                                natureField.value = sinistre.nature;
+                                                console.log(`✅ Nature ${i} remplie:`, sinistre.nature);
+                                            } else {
+                                                console.log(`❌ Champ nature ${i} non trouvé`);
+                                            }
+                                        }
+                                        
+                                        // Remplir le taux
+                                        if (sinistre.tauxResponsabilite) {
+                                            const tauxField = document.querySelector(`input[name="responsabilite${i}"][value="${sinistre.tauxResponsabilite}"]`);
+                                            if (tauxField) {
+                                                tauxField.checked = true;
+                                                console.log(`✅ Taux ${i} rempli:`, sinistre.tauxResponsabilite);
+                                            } else {
+                                                console.log(`❌ Champ taux ${i} non trouvé pour valeur:`, sinistre.tauxResponsabilite);
+                                            }
+                                        }
+                                    });
+                                    console.log('🔄 Remplissage terminé');
+                                }, 300);
+                            } else {
+                                console.log('❌ Champ nombreSinistres non trouvé');
+                            }
+                        } else {
+                            console.log('ℹ️ Aucun sinistre à reconstituer');
+                        }
+                    }
+                    
+                    // Déclencher les événements pour afficher/masquer les champs conditionnels
+                    setTimeout(() => {
+                        console.log('Déclenchement des événements conditionnels...');
+                        console.log('antecedents.dejaAssure:', antecedents.dejaAssure);
+                        console.log('antecedents.situationContrat:', antecedents.situationContrat);
+                        
+                        // Vérifier l'état des radios avant de déclencher l'événement
+                        console.log('État avant déclenchement - OUI:', document.getElementById('dejaAssureOui')?.checked);
+                        console.log('État avant déclenchement - NON:', document.getElementById('dejaAssureNon')?.checked);
+                        
+                        // Déclencher l'événement change pour afficher/masquer les champs
+                        const dejaAssureRadio = document.querySelector(`input[name="dejaAssure"][value="${antecedents.dejaAssure ? 'oui' : 'non'}"]`);
+                        if (dejaAssureRadio) {
+                            dejaAssureRadio.dispatchEvent(new Event('change'));
+                        }
+                        
+                        // Vérifier l'état juste après le déclenchement
+                        setTimeout(() => {
+                            console.log('État juste après déclenchement - OUI:', document.getElementById('dejaAssureOui')?.checked);
+                            console.log('État juste après déclenchement - NON:', document.getElementById('dejaAssureNon')?.checked);
+                        }, 50);
+                        
+                        // Surveiller les changements pendant 2 secondes
+                        let checkCount = 0;
+                        const monitorInterval = setInterval(() => {
+                            checkCount++;
+                            const ouiChecked = document.getElementById('dejaAssureOui')?.checked;
+                            const nonChecked = document.getElementById('dejaAssureNon')?.checked;
+                            
+                            if (checkCount === 1) {
+                                console.log(' Surveillance 100ms - OUI:', ouiChecked, 'NON:', nonChecked);
+                            } else if (checkCount === 5) {
+                                console.log(' Surveillance 500ms - OUI:', ouiChecked, 'NON:', nonChecked);
+                            } else if (checkCount === 10) {
+                                console.log(' Surveillance 1s - OUI:', ouiChecked, 'NON:', nonChecked);
+                            } else if (checkCount === 20) {
+                                console.log(' Surveillance 2s - OUI:', ouiChecked, 'NON:', nonChecked);
+                                clearInterval(monitorInterval);
+                            }
+                            
+                            // Détecter si le radio change de manière inattendue
+                            if (checkCount > 1 && ouiChecked === true && antecedents.dejaAssure === false) {
+                                console.log('🚨 DÉTECTION : Le radio a été changé en OUI alors qu il devrait être NON !');
+                                console.log('🚨 Appel de la pile :', new Error().stack);
+                            }
+                        }, 100);
+                        
+                        // Déclencher l'événement pour la résiliation si nécessaire
+                        if (antecedents.situationContrat === 'resilier') {
+                            const situationResilier = document.querySelector('input[name="situationContrat"][value="resilier"]');
+                            if (situationResilier) {
+                                situationResilier.dispatchEvent(new Event('change'));
+                            }
+                        }
+                    }, 100);
+                } else {
+                    console.log('Aucun antécédent trouvé dans devis');
+                    // Si aucun antécédent, s'assurer que "Non" est coché par défaut
+                    setRadioValue('dejaAssure', 'non');
+                }
+                
+                // Mettre à jour les totaux
+                if (typeof calculerTotal === 'function') {
+                    setTimeout(calculerTotal, 100);
+                }
+                
+                // Faire défiler vers le haut du formulaire
+                window.scrollTo(0, 0);
+                
+                console.log('Devis chargé avec succès');
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement du devis:', error);
+            }
+        }
+
+        // Attendre que le DOM soit chargé
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                init();
+            });
+        } else {
+            // Le DOM est déjà chargé
+            init();
+        }
+        
+        // Fonction d'initialisation principale
+        function init() {
+            console.log('Initialisation du formulaire...');
+            
+            // Vérifier que DevisGenerator est disponible
+            if (typeof DevisGenerator === 'undefined') {
+                console.error('Erreur: La classe DevisGenerator n\'est pas disponible');
+                document.write('<div style="color:red;padding:20px;font-family:Arial;">Erreur: Impossible de charger le générateur de devis. Veuillez recharger la page.</div>');
+                return;
+            }
+            
+            // Gestion de l'ajout/suppression du deuxième conducteur
+            const ajouterBtn = document.getElementById('ajouterConducteur');
+            const supprimerBtn = document.getElementById('supprimerConducteur');
+            const deuxiemeConducteur = document.getElementById('deuxiemeConducteur');
+            
+            if (ajouterBtn && supprimerBtn && deuxiemeConducteur) {
+                ajouterBtn.addEventListener('click', function() {
+                    deuxiemeConducteur.style.display = 'block';
+                    ajouterBtn.style.display = 'none';
+                    // Faire défiler jusqu'au formulaire du deuxième conducteur
+                    deuxiemeConducteur.scrollIntoView({ behavior: 'smooth' });
+                });
+                
+                supprimerBtn.addEventListener('click', function() {
+                    deuxiemeConducteur.style.display = 'none';
+                    ajouterBtn.style.display = 'flex';
+                    // Réinitialiser les champs du deuxième conducteur
+                    document.querySelectorAll('#deuxiemeConducteur input').forEach(input => {
+                        input.value = '';
+                    });
+                });
+            }
+            
+            // Gestion des champs d'antécédents d'assurance
+            const dejaAssureOui = document.getElementById('dejaAssureOui');
+            const dejaAssureNon = document.getElementById('dejaAssureNon');
+            const infoAncienneAssurance = document.getElementById('infoAncienneAssurance');
+            const situationContratEnCours = document.querySelector('input[name="situationContrat"][value="enCours"]');
+            const situationContratResilier = document.querySelector('input[name="situationContrat"][value="resilier"]');
+            const infoResiliation = document.getElementById('infoResiliation');
+            const aEuSinistresOui = document.getElementById('aEuSinistresOui');
+            const aEuSinistresNon = document.getElementById('aEuSinistresNon');
+            const sinistresContainer = document.getElementById('sinistresContainer');
+            const nombreSinistresSelect = document.getElementById('nombreSinistres');
+            const listeSinistres = document.getElementById('listeSinistres');
+
+            // Gérer l'affichage des champs en fonction de la situation d'assurance
+            function toggleAssuranceFields() {
+                if (dejaAssureOui.checked) {
+                    infoAncienneAssurance.style.display = 'block';
+                    // Si l'utilisateur est déjà assuré, on active la gestion de la résiliation
+                    toggleResiliationFields();
+                    
+                    // Pas de restriction de date pour la résiliation
+                    const dateResiliation = document.getElementById('dateResiliation');
+                    if (dateResiliation) {
+                        // Si aucune date n'est définie, on met la date du jour par défaut
+                        if (!dateResiliation.value) {
+                            dateResiliation.value = new Date().toISOString().split('T')[0];
+                        }
+                    }
+                } else {
+                    infoAncienneAssurance.style.display = 'none';
+                }
+            }
+            
+            // Gérer l'affichage des champs de résiliation
+            function toggleResiliationFields() {
+                const situationContratResilier = document.querySelector('input[name="situationContrat"][value="resilier"]');
+                if (situationContratResilier && situationContratResilier.checked) {
+                    infoResiliation.style.display = 'block';
+                } else {
+                    infoResiliation.style.display = 'none';
+                }
+            }
+            
+            if (aEuSinistresOui && aEuSinistresNon) {
+                aEuSinistresOui.addEventListener('change', function() {
+                    sinistresContainer.style.display = this.checked ? 'block' : 'none';
+                    if (!this.checked) {
+                        listeSinistres.innerHTML = '';
+                    } else {
+                        updateSinistres();
+                    }
+                });
+                
+                aEuSinistresNon.addEventListener('change', function() {
+                    if (this.checked) {
+                        sinistresContainer.style.display = 'none';
+                        listeSinistres.innerHTML = '';
+                    }
+                });
+            }
+            
+            if (nombreSinistresSelect) {
+                nombreSinistresSelect.addEventListener('change', updateSinistres);
+            }
+            
+            function updateSinistres() {
+                if (!nombreSinistresSelect || !listeSinistres) return;
+                
+                const nombre = parseInt(nombreSinistresSelect.value);
+                listeSinistres.innerHTML = '';
+                
+                if (nombre > 0) {
+                    for (let i = 1; i <= nombre; i++) {
+                        const sinistreDiv = document.createElement('div');
+                        sinistreDiv.className = 'sinistre-box';
+                        sinistreDiv.style.marginBottom = '1.5rem';
+                        sinistreDiv.style.padding = '1rem';
+                        sinistreDiv.style.background = '#fff';
+                        sinistreDiv.style.borderRadius = '6px';
+                        sinistreDiv.style.border = '1px solid #e9ecef';
+                        
+                        sinistreDiv.innerHTML = `
+                            <h4 style="margin-top: 0; color: var(--primary-color);">Sinistre ${i}</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sinistreDate${i}">Date du sinistre</label>
+                                    <input type="date" id="sinistreDate${i}" name="sinistreDate${i}" class="form-control" max="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sinistreNature${i}">Nature du sinistre</label>
+                                    <select id="sinistreNature${i}" name="sinistreNature${i}" class="form-control" required>
+                                        <option value="">Sélectionnez</option>
+                                        <option value="corporel">Corporel</option>
+                                        <option value="materiel">Matériel</option>
+                                        <option value="bris_glace">Bris de glace</option>
+                                        <option value="incendie">Incendie</option>
+                                        <option value="vol">Vol</option>
+                                        <option value="catnat">Catastrophe naturelle</option>
+                                        <option value="autre">Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Taux de responsabilité</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="responsabilite${i}" value="0" checked required>
+                                        <span class="radio-custom"></span>
+                                        0%
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="responsabilite${i}" value="50" required>
+                                        <span class="radio-custom"></span>
+                                        50%
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="responsabilite${i}" value="100" required>
+                                        <span class="radio-custom"></span>
+                                        100%
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                        listeSinistres.appendChild(sinistreDiv);
+                    }
+                }
+            }
+
+            // Gérer l'affichage des champs de résiliation
+            function toggleResiliationFields() {
+                if (situationContratResilier.checked) {
+                    infoResiliation.style.display = 'block';
+                } else {
+                    infoResiliation.style.display = 'none';
+                }
+            }
+
+            // Écouter les changements sur les boutons radio
+            dejaAssureOui.addEventListener('change', toggleAssuranceFields);
+            dejaAssureNon.addEventListener('change', toggleAssuranceFields);
+            situationContratEnCours.addEventListener('change', toggleResiliationFields);
+            situationContratResilier.addEventListener('change', toggleResiliationFields);
+            
+            // Gestion des sinistres
+            aEuSinistresOui?.addEventListener('change', function() {
+                sinistresContainer.style.display = this.checked ? 'block' : 'none';
+                if (!this.checked) {
+                    listeSinistres.innerHTML = '';
+                } else {
+                    updateSinistres();
+                }
+            });
+            
+            aEuSinistresNon?.addEventListener('change', function() {
+                if (this.checked) {
+                    sinistresContainer.style.display = 'none';
+                    listeSinistres.innerHTML = '';
+                }
+            });
+            
+            nombreSinistresSelect?.addEventListener('change', updateSinistres);
+            
+            function updateSinistres() {
+                const nombre = parseInt(nombreSinistresSelect.value);
+                listeSinistres.innerHTML = '';
+                
+                if (nombre > 0) {
+                    for (let i = 1; i <= nombre; i++) {
+                        const sinistreDiv = document.createElement('div');
+                        sinistreDiv.className = 'sinistre-box';
+                        sinistreDiv.innerHTML = `
+                            <h4>Sinistre ${i}</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sinistreDate${i}">Date du sinistre</label>
+                                    <input type="date" id="sinistreDate${i}" name="sinistreDate${i}" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sinistreNature${i}">Nature du sinistre</label>
+                                    <select id="sinistreNature${i}" name="sinistreNature${i}" class="form-control">
+                                        <option value="">Sélectionnez</option>
+                                        <option value="corporel">Corporel</option>
+                                        <option value="materiel">Matériel</option>
+                                        <option value="bris_glace">Bris de glace</option>
+                                        <option value="incendie">Incendie</option>
+                                        <option value="vol">Vol</option>
+                                        <option value="catnat">Catastrophe naturelle</option>
+                                        <option value="autre">Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Taux de responsabilité</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="responsabilite${i}" value="0" checked>
+                                        <span class="radio-custom"></span>
+                                        0%
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="responsabilite${i}" value="50">
+                                        <span class="radio-custom"></span>
+                                        50%
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="responsabilite${i}" value="100">
+                                        <span class="radio-custom"></span>
+                                        100%
+                                    </label>
+                                </div>
+                            </div>
+                            <hr>
+                        `;
+                        listeSinistres.appendChild(sinistreDiv);
+                    }
+                }
+            }
+
+            // Initialiser l'état des champs
+            toggleAssuranceFields();
+            // Définir la date minimale pour la date d'effet (demain)
+            const dateEffet = document.getElementById('dateEffet');
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // Formater la date au format YYYY-MM-DD
+            const yyyy = tomorrow.getFullYear();
+            const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const dd = String(tomorrow.getDate()).padStart(2, '0');
+            const minDate = `${yyyy}-${mm}-${dd}`;
+            
+            dateEffet.min = minDate;
+            dateEffet.value = minDate;
+            
+            // Gérer la soumission du formulaire
+            const form = document.querySelector('.form-container');
+            const submitBtn = document.getElementById('genererDevis');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Vérifier si les conditions sont acceptées
+                if (!document.getElementById('conditions').checked) {
+                    alert('Veuillez accepter les conditions générales pour continuer.');
+                    return;
+                }
+                
+                // Désactiver le bouton et afficher l'animation de chargement
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading"></span> Génération en cours...';
+                
+                // Simuler un délai pour la génération du PDF
+                setTimeout(() => {
+                    // Récupérer les valeurs du formulaire
+                    // Récupérer les informations sur les antécédents d'assurance
+                    const dejaAssure = document.getElementById('dejaAssureOui').checked;
+                    let antecedentsAssurance = null;
+                    
+                    // Récupérer les informations sur les sinistres
+                    const aEuSinistres = document.getElementById('aEuSinistresOui')?.checked || false;
+                    const sinistres = [];
+                    
+                    if (aEuSinistres) {
+                        const nombreSinistres = parseInt(document.getElementById('nombreSinistres')?.value) || 0;
+                        for (let i = 1; i <= nombreSinistres; i++) {
+                            const date = document.getElementById(`sinistreDate${i}`)?.value;
+                            const nature = document.getElementById(`sinistreNature${i}`)?.value;
+                            const responsabilite = document.querySelector(`input[name="responsabilite${i}"]:checked`)?.value || '0';
+                            
+                            if (date && nature) {
+                                sinistres.push({
+                                    date: date,
+                                    description: nature,
+                                    responsabilite: responsabilite + '%'
+                                });
+                            }
+                        }
+                    }
+                    
+                    if (dejaAssure) {
+                        const situationContrat = document.querySelector('input[name="situationContrat"]:checked')?.value;
+                        const resiliation = situationContrat === 'resilier' ? {
+                            date: document.getElementById('dateResiliation')?.value || '',
+                            motif: document.getElementById('motifResiliation')?.value || ''
+                        } : null;
+                        
+                        antecedentsAssurance = {
+                            dejaAssure: true,
+                            moisAssurance: parseInt(document.getElementById('moisAssurance')?.value) || 0,
+                            bonusMalus: parseFloat(document.getElementById('bonusMalus')?.value) || 1.0,
+                            situationContrat: situationContrat,
+                            resiliation: resiliation,
+                            aEuSinistres: aEuSinistres,
+                            sinisters: sinistres
+                        };
+                    } else {
+                        antecedentsAssurance = {
+                            dejaAssure: false,
+                            aEuSinistres: aEuSinistres,
+                            sinisters: sinistres
+                        };
+                    }
+
+                    // Récupérer les informations de la proposition
+                    const proposition = {
+                        typeAssurance: document.getElementById('typeAssurance').value,
+                        fractionnement: document.getElementById('fractionnement').value,
+                        cotisation: parseFloat(document.getElementById('cotisation').value) || 0,
+                        fraisDossier: parseFloat(document.getElementById('fraisDossier').value) || 0,
+                        dateEffet: document.getElementById('dateEffet').value,
+                        assistance: document.getElementById('assistance')?.checked || false
+                    };
+
+                    // Récupérer et logger la valeur du champ datePermis
+                    const permisDateInput = document.getElementById('datePermis');
+                    const permisDateValue = permisDateInput?.value;
+                    console.log('=== DEBUG PERMIS DATE ===');
+                    console.log('Valeur brute du champ datePermis:', permisDateValue);
+                    console.log('Type de la valeur:', typeof permisDateValue);
+                    console.log('Champ datePermis existe:', !!permisDateInput);
+                    if (permisDateInput) {
+                        console.log('Valeur dans l\'input:', permisDateInput.value);
+                        console.log('Valeur en tant que date:', new Date(permisDateValue));
+                    }
+                    
+                    // Formater la date pour s'assurer qu'elle est au bon format
+                    let formattedPermisDate = '';
+                    if (permisDateValue) {
+                        try {
+                            const date = new Date(permisDateValue);
+                            if (!isNaN(date.getTime())) {
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                formattedPermisDate = `${year}-${month}-${day}`;
+                                console.log('Date formatée:', formattedPermisDate);
+                            }
+                        } catch (e) {
+                            console.error('Erreur lors du formatage de la date:', e);
+                        }
+                    }
+                    
+                    const client = {
+                        // Informations personnelles
+                        nom: document.getElementById('nom').value.trim(),
+                        prenom: document.getElementById('prenom').value.trim(),
+                        adresse: document.getElementById('adresse').value.trim(),
+                        codePostal: document.getElementById('codePostal').value.trim(),
+                        ville: document.getElementById('ville').value.trim(),
+                        telephone: document.getElementById('telephone').value.trim(),
+                        email: document.getElementById('email').value.trim(),
+                        dateNaissance: document.getElementById('dateNaissance')?.value || '',
+                        permisNumero: document.getElementById('permisNumero')?.value.trim() || '',
+                        permisDate: formattedPermisDate || permisDateValue || '',
+                        permisLieu: document.getElementById('permisLieu')?.value.trim() || '',
+                        permisPays: document.getElementById('permisPays')?.value || '',
+                        situationFamiliale: document.getElementById('situationFamiliale')?.value || '',
+                        profession: document.getElementById('profession')?.value.trim() || '',
+                        
+                        // Informations sur l'assurance
+                        dateEffet: document.getElementById('dateEffet')?.value || '',
+                        typeAssurance: document.getElementById('typeAssurance')?.value || '',
+                        franchise: document.getElementById('franchise')?.value || '',
+                        options: Array.from(document.querySelectorAll('input[name="options"]:checked')).map(opt => opt.value),
+                        
+                        // Antécédents d'assurance
+                        antecedentsAssurance: antecedentsAssurance
+                    };
+
+// Les variables sont déjà définies dans l'objet proposition
+                    const marque = document.getElementById('marque').value.trim();
+                    const modele = document.getElementById('modele').value.trim();
+                    const annee = document.getElementById('annee').value;
+                    const puissance = document.getElementById('puissance').value;
+                    const commentaires = document.getElementById('commentaires').value.trim();
+                    const dateEffetValue = document.getElementById('dateEffet').value;
+
+                    // Valider les champs obligatoires
+                    if (!client.nom || !client.prenom || !client.adresse || !client.codePostal || 
+                        !client.ville || !client.telephone || !client.email || !marque || !modele || 
+                        !annee || !puissance || !proposition.typeAssurance) {
+                        
+                        alert('Veuillez remplir tous les champs obligatoires marqués d\'un astérisque (*)');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+
+                    // Calculer les prestations en fonction des options sélectionnées
+                    const prestations = [];
+                    
+                    // Calculer le prix de l'assurance en fonction du type et de la puissance
+                    const puissanceNum = parseInt(puissance) || 5; // Valeur par défaut si non définie
+                    const coefficientPuissance = 1 + (puissanceNum - 5) * 0.1; // +10% par CV au-dessus de 5
+                    let prixAssurance = 0;
+                    
+                    switch(proposition.typeAssurance) {
+                        case 'tous_risques':
+                            prixAssurance = 45.00 * coefficientPuissance;
+                            prestations.push({
+                                designation: `Assurance Tous Risques (${puissance} CV)`,
+                                description: 'Garantie complète incluant la responsabilité civile, le vol, l\'incendie, le bris de glace et les dommages tous accidents.',
+                                prixUnitaire: prixAssurance,
+                                quantite: 1
+                            });
+                            break;
+                        case 'tiers':
+                            prixAssurance = 25.00 * coefficientPuissance;
+                            prestations.push({
+                                designation: `Assurance au Tiers (${puissance} CV)`,
+                                description: 'Garantie responsabilité civile obligatoire couvrant les dommages causés aux tiers.',
+                                prixUnitaire: prixAssurance,
+                                quantite: 1
+                            });
+                            break;
+                        case 'tiers_vol_incendie':
+                            prixAssurance = 35.00 * coefficientPuissance;
+                            prestations.push({
+                                designation: `Assurance Tiers, Vol et Incendie (${puissance} CV)`,
+                                description: 'Garantie responsabilité civile obligatoire + protection contre le vol et l\'incendie.',
+                                prixUnitaire: prixAssurance,
+                                quantite: 1
+                            });
+                            break;
+                    }
+
+                    // Ajouter l'assistance si sélectionnée
+                    const assistanceCheckbox = document.getElementById('assistance');
+                    if (assistanceCheckbox && assistanceCheckbox.checked) {
+                        prestations.push({
+                            designation: 'Assistance 0km',
+                            description: 'Assistance dépannage et remorquage 24h/24 et 7j/7, partout en France et en Europe.',
+                            prixUnitaire: 12.50,
+                            quantite: 1
+                        });
+                    }
+
+                    // Ajouter les frais de dossier
+                    prestations.push({
+                        designation: 'Frais de dossier',
+                        description: 'Frais administratifs de traitement de votre dossier.',
+                        prixUnitaire: 25.00,
+                        quantite: 1
+                    });
+
+                    // Ajouter une réduction pour les nouveaux clients (exemple)
+                    const estNouveauClient = true; // À remplacer par une logique réelle
+                    if (estNouveauClient) {
+                        const reduction = prixAssurance * 0.10; // 10% de réduction
+                        if (reduction > 0) {
+                            prestations.push({
+                                designation: 'Réduction nouveau client',
+                                description: 'Remise spéciale de bienvenue de 10% sur votre première souscription.',
+                                prixUnitaire: -reduction,
+                                quantite: 1
+                            });
+                        }
+                    }
+
+                    // Valider les champs obligatoires
+                    if (!client.nom || !client.prenom || !client.adresse || !client.codePostal || 
+                        !client.ville || !client.telephone || !client.email || !marque || !modele || 
+                        !annee || !puissance || !proposition.typeAssurance) {
+                        
+                        alert('Veuillez remplir tous les champs obligatoires marqués d\'un astérisque (*)');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+
+                    // Initialiser les informations complémentaires
+                    const infosComplementaires = {
+                        vehicule: {
+                            marque: marque,
+                            modele: modele,
+                            annee: annee,
+                            puissance: puissance,
+                            immatriculation: document.getElementById('immatriculation')?.value || 'Non renseignée',
+                            carburant: document.getElementById('carburant')?.value || 'Non spécifié',
+                            dateMiseCirculation: document.getElementById('dateMiseCirculation')?.value || 'Non spécifiée',
+                            stationnement: document.getElementById('stationnement')?.value || 'Non spécifié',
+                            usage: document.getElementById('usage')?.value || 'Non spécifié'
+                        },
+                        antecedentsAssurance: client.antecedentsAssurance, // Ajouter les antécédents d'assurance
+                        commentaires: document.getElementById('commentaires')?.value || '',
+                        conditionsGenerales: true,
+                        dateGeneration: new Date().toLocaleDateString('fr-FR'),
+                        typeAssurance: proposition.typeAssurance,
+                        assistance: proposition.assistance,
+                        fractionnement: proposition.fractionnement,
+                        dateEffet: proposition.dateEffet,
+                        // Ajouter les montants de cotisation et frais de dossier
+                        cotisation: proposition.cotisation,
+                        fraisDossier: proposition.fraisDossier
+                    };
+                    
+                    console.log('Valeurs de cotisation et frais de dossier:', {
+                        cotisation: proposition.cotisation,
+                        fraisDossier: proposition.fraisDossier
+                    });
+
+                    // Enregistrer le devis dans le localStorage
+                    try {
+                        // Vérifier si nous sommes en mode modification
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const devisIdModif = urlParams.get('devisId');
+                        
+                        // Récupérer les devis existants
+                        const devisExistants = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                        
+                        let devis;
+                        
+                        if (devisIdModif) {
+                            // Mode modification : mettre à jour le devis existant
+                            const index = devisExistants.findIndex(d => d.id === devisIdModif);
+                            if (index !== -1) {
+                                devisExistants[index] = {
+                                    id: devisIdModif,
+                                    dateCreation: devisExistants[index].dateCreation,
+                                    agentId: window.authClient?.user?.id || null,
+                                    agentUsername: window.authClient?.user?.username || null,
+                                    client: client,
+                                    vehicule: infosComplementaires.vehicule,
+                                    prestations: prestations,
+                                    infosComplementaires: {
+                                        ...infosComplementaires,
+                                        dateEffet: proposition.dateEffet,
+                                        typeAssurance: proposition.typeAssurance,
+                                        assistance: proposition.assistance,
+                                        montantTotal: prestations.reduce((total, p) => total + (p.prixUnitaire * p.quantite), 0) + proposition.cotisation + proposition.fraisDossier,
+                                    },
+                                    statut: 'Modifié',
+                                    formule: proposition.typeAssurance, // Utiliser la valeur actuelle du formulaire
+                                    conditionsGenerales: true,
+                                    dateGeneration: new Date().toLocaleDateString('fr-FR'),
+                                    dateModification: new Date().toISOString()
+                                };
+                                
+                                // Mettre à jour le devis existant
+                                console.log('Devis mis à jour avec succès:', devisIdModif);
+                            } else {
+                                console.error('Devis à modifier non trouvé, création d\'un nouveau devis');
+                                // Fallback : créer un nouveau devis
+                                console.log('Fallback création devis par:', window.authClient?.user);
+                                console.log('Fallback window.authClient disponible:', !!window.authClient);
+                                console.log('Fallback window.authClient.user disponible:', !!window.authClient?.user);
+                                
+                                const currentUser = window.authClient?.user;
+                                const agentId = currentUser?.id || null;
+                                const agentUsername = currentUser?.username || null;
+                                
+                                console.log('Fallback Agent ID à assigner:', agentId);
+                                console.log('Fallback Agent Username à assigner:', agentUsername);
+                                
+                                devis = {
+                                    id: 'dev-' + Date.now(),
+                                    dateCreation: new Date().toISOString(),
+                                    agentId: agentId,
+                                    agentUsername: agentUsername,
+                                    client: client,
+                                    vehicule: infosComplementaires.vehicule,
+                                    prestations: prestations,
+                                    infosComplementaires: {
+                                        ...infosComplementaires,
+                                        dateEffet: proposition.dateEffet,
+                                        typeAssurance: proposition.typeAssurance,
+                                        assistance: proposition.assistance,
+                                        montantTotal: prestations.reduce((total, p) => total + (p.prixUnitaire * p.quantite), 0) + proposition.cotisation + proposition.fraisDossier,
+                                    },
+                                    statut: 'Généré',
+                                    formule: proposition.typeAssurance, // Utiliser la valeur actuelle du formulaire
+                                    conditionsGenerales: true,
+                                    dateGeneration: new Date().toLocaleDateString('fr-FR')
+                                };
+                                devisExistants.push(devis);
+                            }
+                        } else {
+                            // Mode création : créer un nouveau devis
+                            console.log('Création devis par:', window.authClient?.user);
+                            console.log('window.authClient disponible:', !!window.authClient);
+                            console.log('window.authClient.user disponible:', !!window.authClient?.user);
+                            
+                            const currentUser = window.authClient?.user;
+                            const agentId = currentUser?.id || null;
+                            const agentUsername = currentUser?.username || null;
+                            
+                            console.log('Agent ID à assigner:', agentId);
+                            console.log('Agent Username à assigner:', agentUsername);
+                            
+                            devis = {
+                                id: 'dev-' + Date.now(),
+                                dateCreation: new Date().toISOString(),
+                                agentId: agentId,
+                                agentUsername: agentUsername,
+                                client: client,
+                                vehicule: infosComplementaires.vehicule,
+                                prestations: prestations,
+                                infosComplementaires: {
+                                    ...infosComplementaires,
+                                    dateEffet: proposition.dateEffet,
+                                    typeAssurance: proposition.typeAssurance,
+                                    assistance: proposition.assistance,
+                                    montantTotal: prestations.reduce((total, p) => total + (p.prixUnitaire * p.quantite), 0) + proposition.cotisation + proposition.fraisDossier,
+                                },
+                                statut: 'Généré',
+                                formule: proposition.typeAssurance, // Utiliser la valeur actuelle du formulaire
+                                conditionsGenerales: true,
+                                dateGeneration: new Date().toLocaleDateString('fr-FR')
+                            };
+                            
+                            // Ajouter le nouveau devis
+                            devisExistants.push(devis);
+                        }
+                        
+                        // Sauvegarder dans localStorage
+                        localStorage.setItem('devisTestPdf', JSON.stringify(devisExistants));
+                        console.log('Devis enregistré avec succès:', devis?.id || 'ID inconnu');
+                        
+                    } catch (error) {
+                        console.error('Erreur lors de l\'enregistrement du devis:', error);
+                        alert('Une erreur est survenue lors de l\'enregistrement du devis : ' + error.message);
+                    }
+                    
+                    // Générer le devis
+                    console.log('Début de la génération du devis...');
+                    console.log('Données du client :', client);
+                    console.log('Prestations :', prestations);
+                    console.log('Infos complémentaires :', infosComplementaires);
+                    
+                    try {
+                        // Vérifier si jsPDF est chargé
+                        if (typeof jspdf === 'undefined') {
+                            throw new Error('La bibliothèque jsPDF n\'est pas chargée correctement');
+                        }
+                        
+                        // Créer une instance du générateur de devis
+                        const devisGenerator = new DevisGenerator();
+                        console.log('Instance DevisGenerator créée');
+                        
+                        // Générer le PDF
+                        devisGenerator.generateDevis(client, prestations, infosComplementaires);
+                        console.log('Méthode generateDevis appelée avec succès');
+                        
+                        // Réinitialiser le bouton
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        
+                        // Afficher un message de succès
+                        alert('Votre devis a été généré avec succès !');
+                    } catch (error) {
+                        console.error('ERREUR lors de la génération du devis :', error);
+                        console.error('Détails de l\'erreur :', {
+                            message: error.message,
+                            name: error.name,
+                            stack: error.stack
+                        });
+                        alert('Une erreur est survenue lors de la génération du devis : ' + error.message);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    }
+                }, 1500); // Délai simulé pour la génération
+            });
+            
+            // Gérer le clic sur le bouton de génération de devis
+            document.getElementById('genererDevis').addEventListener('click', function() {
+                form.dispatchEvent(new Event('submit'));
+            });
+            
+            // Gérer le clic sur le bouton d'enregistrement des modifications
+            document.getElementById('enregistrerModifications').addEventListener('click', function() {
+                console.log('Bouton d\'enregistrement des modifications cliqué');
+                
+                // Fonction utilitaire pour récupérer la valeur d'un champ en toute sécurité
+                function getFieldValue(id) {
+                    const element = document.getElementById(id);
+                    return element ? element.value : '';
+                }
+                
+                // Fonction utilitaire pour récupérer l'état d'une checkbox en toute sécurité
+                function getCheckboxValue(id) {
+                    const element = document.getElementById(id);
+                    return element ? element.checked : false;
+                }
+                
+                // Fonction utilitaire pour récupérer la valeur d'un radio bouton
+                function getRadioValue(name) {
+                    const element = document.querySelector(`input[name="${name}"]:checked`);
+                    return element ? element.value : '';
+                }
+                
+                // Récupérer les valeurs du formulaire
+                console.log('=== DEBUG SAUVEGARDE CHAMPS FINANCIERS ===');
+                
+                // Vérifier les valeurs directement depuis les inputs
+                const inputCotisation = document.getElementById('cotisation');
+                const inputFraisDossier = document.getElementById('fraisDossier');
+                const inputFractionnement = document.getElementById('fractionnement');
+                const inputTypeAssurance = document.getElementById('typeAssurance');
+                
+                console.log('Valeurs directes des inputs:');
+                console.log('- input cotisation.value:', inputCotisation?.value);
+                console.log('- input fraisDossier.value:', inputFraisDossier?.value);
+                console.log('- input fractionnement.value:', inputFractionnement?.value);
+                console.log('- input typeAssurance.value:', inputTypeAssurance?.value);
+                
+                const fractionnementValue = getFieldValue('fractionnement'); // Corrigé: select pas radio
+                const cotisationValue = parseFloat(getFieldValue('cotisation')) || 0; // Convertir en nombre
+                const fraisDossierValue = parseFloat(getFieldValue('fraisDossier')) || 0; // Convertir en nombre
+                const typeAssuranceValue = getFieldValue('typeAssurance');
+                
+                console.log('Valeurs brutes des champs:');
+                console.log('- fractionnement:', fractionnementValue);
+                console.log('- cotisation:', cotisationValue, '(type:', typeof cotisationValue, ')');
+                console.log('- fraisDossier:', fraisDossierValue, '(type:', typeof fraisDossierValue, ')');
+                console.log('- typeAssurance:', typeAssuranceValue);
+                
+                const formData = {
+                    // Informations client
+                    client: {
+                        nom: getFieldValue('nom'),
+                        prenom: getFieldValue('prenom'),
+                        dateNaissance: getFieldValue('dateNaissance'),
+                        adresse: getFieldValue('adresse'),
+                        codePostal: getFieldValue('codePostal'),
+                        ville: getFieldValue('ville'),
+                        telephone: getFieldValue('telephone'),
+                        email: getFieldValue('email'),
+                        // Ajouter les champs du permis avec les bons IDs
+                        permisNumero: getFieldValue('permisNumero'),
+                        permisDateObtention: getFieldValue('datePermis'), // ID correct
+                        permisDelivrePar: getFieldValue('permisDelivrePar'),
+                        // Ajouter la situation familiale et profession
+                        situationFamiliale: getFieldValue('situationFamiliale'),
+                        nombreEnfants: getFieldValue('nombreEnfants'),
+                        profession: getFieldValue('profession')
+                    },
+                    // Informations permis séparées pour meilleure organisation
+                    permis: {
+                        numero: getFieldValue('permisNumero'),
+                        dateObtention: getFieldValue('datePermis'), // ID correct
+                        delivrePar: getFieldValue('permisDelivrePar')
+                    },
+                    // Informations véhicule
+                    vehicule: {
+                        marque: getFieldValue('marque'),
+                        modele: getFieldValue('modele'),
+                        annee: getFieldValue('annee'),
+                        puissance: getFieldValue('puissance'),
+                        immatriculation: getFieldValue('immatriculation'),
+                        dateMec: getFieldValue('dateMiseCirculation'), // ID correct
+                        energie: getFieldValue('energie'),
+                        usage: getFieldValue('usage'),
+                        carburant: getFieldValue('carburant')
+                    },
+                    // Options et garanties
+                    options: {
+                        assistance: getCheckboxValue('assistance'),
+                        protectionJuridique: getCheckboxValue('protectionJuridique'),
+                        vehiculeRemplacement: getCheckboxValue('vehiculeRemplacement'),
+                        brisGlace: getCheckboxValue('brisGlace')
+                    },
+                    // Informations complémentaires
+                    infosComplementaires: {
+                        typeAssurance: typeAssuranceValue, // Corrigé: select pas radio
+                        dateEffet: getFieldValue('dateEffet'),
+                        fractionnement: fractionnementValue || 'Mensuel',
+                        cotisation: cotisationValue, // Déjà converti en nombre
+                        fraisDossier: fraisDossierValue // Déjà converti en nombre
+                    },
+                    // Antécédents d'assurance
+                    antecedentsAssurance: (() => {
+                        // Récupérer les informations sur les antécédents d'assurance
+                        const dejaAssure = document.getElementById('dejaAssureOui')?.checked || false;
+                        const aEuSinistres = document.getElementById('aEuSinistresOui')?.checked || false;
+                        const situationContrat = document.querySelector('input[name="situationContrat"]:checked')?.value;
+                        
+                        console.log('=== SAUVEGARDE ANTÉCÉDENTS - APPROCHE SIMPLIFIÉE ===');
+                        console.log('dejaAssure:', dejaAssure);
+                        console.log('aEuSinistres:', aEuSinistres);
+                        console.log('situationContrat:', situationContrat);
+                        
+                        // Créer l'objet antecedentsAssurance de manière simple et directe
+                        let antecedentsAssurance = {
+                            dejaAssure: dejaAssure,
+                            aEuSinistres: aEuSinistres,
+                            situationContrat: situationContrat || '',
+                            sinisters: []
+                        };
+                        
+                        // Ajouter les champs spécifiques si déjà assuré
+                        if (dejaAssure) {
+                            antecedentsAssurance.moisAssurance = parseInt(getFieldValue('moisAssurance')) || 0;
+                            antecedentsAssurance.bonusMalus = parseFloat(getFieldValue('bonusMalus')) || 1.0;
+                            antecedentsAssurance.ancienAssureur = getFieldValue('ancienAssureur') || '';
+                            
+                            // Ajouter résiliation si contrat résilié
+                            if (situationContrat === 'resilier') {
+                                antecedentsAssurance.resiliation = {
+                                    date: getFieldValue('dateResiliation') || '',
+                                    motif: getFieldValue('motifResiliation') || ''
+                                };
+                            }
+                        }
+                        
+                        // Ajouter les sinistres si applicable
+                        if (aEuSinistres) {
+                            const nombreSinistres = parseInt(document.getElementById('nombreSinistres')?.value) || 0;
+                            console.log('🔍 === SAUVEGARDE SINISTRES - APPROCHE ULTRA-SIMPLE ===');
+                            console.log('aEuSinistres:', aEuSinistres);
+                            console.log('nombreSinistres:', nombreSinistres);
+                            
+                            // Créer un tableau simple
+                            const sinistresArray = [];
+                            
+                            // Traiter chaque sinistre
+                            for (let i = 1; i <= nombreSinistres; i++) {
+                                const dateValue = document.getElementById(`sinistreDate${i}`)?.value || '';
+                                const natureValue = document.getElementById(`sinistreNature${i}`)?.value || '';
+                                const tauxValue = document.querySelector(`input[name="responsabilite${i}"]:checked`)?.value || '';
+                                
+                                console.log(`Sinistre ${i}: date="${dateValue}", nature="${natureValue}", taux="${tauxValue}"`);
+                                
+                                // Ajouter seulement si au moins une valeur existe
+                                if (dateValue || natureValue || tauxValue) {
+                                    sinistresArray.push({
+                                        date: dateValue,
+                                        nature: natureValue,
+                                        tauxResponsabilite: tauxValue
+                                    });
+                                    console.log(`✅ Sinistre ${i} ajouté au tableau`);
+                                }
+                            }
+                            
+                            // Assigner directement le tableau
+                            antecedentsAssurance.sinisters = sinistresArray;
+                            console.log('📊 Tableau final assigné:', sinistresArray);
+                            console.log('📊 antecedentsAssurance.sinisters:', antecedentsAssurance.sinisters);
+                        } else {
+                            console.log('⚠️ Pas de sinistres (aEuSinistres = false)');
+                            antecedentsAssurance.sinisters = [];
+                        }
+                        
+                        console.log('Structure finale antecedentsAssurance:', JSON.stringify(antecedentsAssurance, null, 2));
+                        return antecedentsAssurance;
+                    })(),
+                    // Métadonnées
+                    dateModification: new Date().toISOString()
+                };
+                
+                console.log('FormData complet:', formData);
+                console.log('infosComplementaires dans formData:', formData.infosComplementaires);
+                console.log('=== DEBUG ANTÉCÉDENTS D\'ASSURANCE ===');
+                console.log('antecedentsAssurance dans formData:', formData.antecedentsAssurance);
+                console.log('antecedentsAssurance.sinisters dans formData:', formData.antecedentsAssurance?.sinisters);
+                console.log('Structure complète des antécédents:', JSON.stringify(formData.antecedentsAssurance, null, 2));
+                console.log('=== DEBUG CHAMPS SPÉCIFIQUES ===');
+                console.log('dejaAssure:', getRadioValue('dejaAssure') === 'oui');
+                console.log('aEuSinistresOui checked:', document.getElementById('aEuSinistresOui')?.checked || false);
+                console.log('situationContrat valeur:', document.querySelector('input[name="situationContrat"]:checked')?.value);
+                console.log('moisAssurance valeur:', parseInt(getFieldValue('moisAssurance')) || 0);
+                console.log('bonusMalus valeur:', parseFloat(getFieldValue('bonusMalus')) || 1.0);
+                console.log('nombreSinistres valeur:', parseInt(document.getElementById('nombreSinistres')?.value) || 0);
+                
+                // Vérifier si nous sommes en mode modification
+                const urlParams = new URLSearchParams(window.location.search);
+                const devisIdModif = urlParams.get('devisId');
+                
+                if (devisIdModif) {
+                    // Mode modification : mettre à jour le devis existant
+                    const devisListe = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                    const index = devisListe.findIndex(d => d.id === devisIdModif);
+                    
+                    if (index !== -1) {
+                        // Mettre à jour le devis existant avec fusion profonde
+                        const devisActuel = devisListe[index];
+                        
+                        console.log('=== DEBUG FUSION ET SAUVEGARDE ===');
+                        console.log('Devis actuel avant mise à jour:', devisActuel);
+                        console.log('infosComplementaires actuel:', devisActuel.infosComplementaires);
+                        
+                        // Fusionner les données correctement
+                        const nouveauDevis = {
+                            ...devisActuel,
+                            id: devisIdModif,
+                            dateModification: new Date().toISOString(),
+                            // Fusionner les objets imbriqués
+                            client: {
+                                ...devisActuel.client,
+                                ...formData.client
+                            },
+                            permis: {
+                                ...devisActuel.permis,
+                                ...formData.permis
+                            },
+                            vehicule: {
+                                ...devisActuel.vehicule,
+                                ...formData.vehicule
+                            },
+                            options: {
+                                ...devisActuel.options,
+                                ...formData.options
+                            },
+                            infosComplementaires: {
+                                ...devisActuel.infosComplementaires,
+                                ...formData.infosComplementaires
+                            },
+                            antecedents: {
+                                ...devisActuel.antecedents,
+                                ...formData.antecedents
+                            },
+                            antecedentsAssurance: {
+                                ...devisActuel.antecedentsAssurance,
+                                ...formData.antecedentsAssurance
+                            }
+                        };
+                        
+                        console.log('Nouveau devis après fusion:', nouveauDevis);
+                        console.log('infosComplementaires après fusion:', nouveauDevis.infosComplementaires);
+                        console.log('antecedentsAssurance après fusion:', nouveauDevis.antecedentsAssurance);
+                        console.log('antecedentsAssurance.sinisters:', nouveauDevis.antecedentsAssurance?.sinisters);
+                        
+                        devisListe[index] = nouveauDevis;
+                        
+                        console.log('Devis mis à jour dans la liste:', devisListe[index]);
+                        localStorage.setItem('devisTestPdf', JSON.stringify(devisListe));
+                        
+                        // Vérifier ce qui a été sauvegardé
+                        const verification = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                        const devisVerifie = verification.find(d => d.id === devisIdModif);
+                        console.log('Vérification après sauvegarde:', devisVerifie);
+                        console.log('infosComplementaires vérifié:', devisVerifie?.infosComplementaires);
+                        console.log('antecedentsAssurance vérifié:', devisVerifie?.antecedentsAssurance);
+                        console.log('antecedentsAssurance.sinisters vérifié:', devisVerifie?.antecedentsAssurance?.sinisters);
+                        
+                        // Afficher un message de succès
+                        showSaveMessage('✅ Modifications enregistrées avec succès !', 'success');
+                        
+                        // Redirection automatique vers la liste des devis après 1.5 seconde
+                        setTimeout(() => {
+                            console.log('Redirection vers la liste des devis...');
+                            window.location.href = 'test-pdf-liste.html';
+                        }, 1500);
+                    } else {
+                        showSaveMessage('❌ Devis non trouvé pour la modification', 'error');
+                    }
+                } else {
+                    // Mode création : créer un nouveau devis brouillon
+                    const newDevis = {
+                        ...formData,
+                        id: 'DEVIS-' + Date.now(),
+                        statut: 'Brouillon',
+                        dateCreation: new Date().toISOString(),
+                        dateModification: new Date().toISOString()
+                    };
+                    
+                    // Ajouter à la liste
+                    const devisListe = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                    devisListe.push(newDevis);
+                    localStorage.setItem('devisTestPdf', JSON.stringify(devisListe));
+                    
+                    // Mettre à jour l'URL pour inclure l'ID du devis
+                    const newUrl = window.location.pathname + '?devisId=' + newDevis.id;
+                    window.history.replaceState({}, '', newUrl);
+                    
+                    // Afficher un message de succès
+                    showSaveMessage('✅ Devis enregistré comme brouillon !', 'success');
+                }
+            });
+            
+            // Fonction pour afficher les messages d'enregistrement
+            function showSaveMessage(message, type) {
+                // Créer un élément de message
+                const messageDiv = document.createElement('div');
+                messageDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 1rem 1.5rem;
+                    border-radius: 8px;
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-weight: 500;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    font-size: 1rem;
+                    max-width: 400px;
+                `;
+                
+                if (type === 'success') {
+                    messageDiv.style.background = '#d4edda';
+                    messageDiv.style.color = '#155724';
+                    messageDiv.style.border = '1px solid #c3e6cb';
+                } else if (type === 'error') {
+                    messageDiv.style.background = '#f8d7da';
+                    messageDiv.style.color = '#721c24';
+                    messageDiv.style.border = '1px solid #f5c6cb';
+                }
+                
+                messageDiv.innerHTML = message;
+                document.body.appendChild(messageDiv);
+                
+                // Supprimer le message après 3 secondes
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 3000);
+            }
+            
+            // Remplir le formulaire avec des données de test
+            // Gestionnaire pour le bouton de remplissage de test
+            const remplirTestBtn = document.getElementById('remplirTest');
+            if (remplirTestBtn) {
+                remplirTestBtn.addEventListener('click', function() {
+                    console.log('Bouton de test cliqué');
+                    
+                    // Informations conducteur
+                    document.getElementById('nom').value = 'Dupont';
+                    document.getElementById('prenom').value = 'Jean';
+                    document.getElementById('adresse').value = '15 Rue des Exemples';
+                    document.getElementById('codePostal').value = '75001';
+                    document.getElementById('ville').value = 'Paris';
+                    document.getElementById('telephone').value = '0612345678';
+                    document.getElementById('email').value = 'jean.dupont@example.com';
+                    
+                    // Date de naissance
+                    const dateNaissance = document.getElementById('dateNaissance');
+                    if (dateNaissance) dateNaissance.value = '1985-05-15';
+                    
+                    // Permis
+                    const permisNumero = document.getElementById('permisNumero');
+                    if (permisNumero) permisNumero.value = '12AB3456789';
+                    
+                    // Détails du véhicule
+                    document.getElementById('marque').value = 'Renault';
+                    document.getElementById('modele').value = 'Clio V';
+                    document.getElementById('annee').value = '2020';
+                    document.getElementById('puissance').value = '5';
+                    document.getElementById('immatriculation').value = 'AB-123-CD';
+                    document.getElementById('carburant').value = 'essence';
+                    
+                    // Définir la date de première mise en circulation (il y a 3 ans)
+                    const dateMiseCirculation = document.getElementById('dateMiseCirculation');
+                    if (dateMiseCirculation) {
+                        const date = new Date();
+                        date.setFullYear(date.getFullYear() - 3);
+                        dateMiseCirculation.value = date.toISOString().split('T')[0];
+                    }
+                    
+                    // Type de stationnement
+                    const stationnement = document.getElementById('stationnement');
+                    if (stationnement) stationnement.value = 'box';
+                    
+                    // Usage du véhicule
+                    const usage = document.getElementById('usage');
+                    if (usage) usage.value = 'prive';
+                    
+                    // Déclencher les événements de changement pour les menus déroulants
+                    if (stationnement) stationnement.dispatchEvent(new Event('change'));
+                    if (usage) usage.dispatchEvent(new Event('change'));
+                    
+                    // Antécédents d'assurance
+                    const dejaAssureOui = document.getElementById('dejaAssureOui');
+                    if (dejaAssureOui) {
+                        dejaAssureOui.checked = true;
+                        const dejaAssureNon = document.getElementById('dejaAssureNon');
+                        if (dejaAssureNon) dejaAssureNon.checked = false;
+                        
+                        // Déclencher l'événement change pour mettre à jour l'affichage
+                        const event = new Event('change');
+                        dejaAssureOui.dispatchEvent(event);
+                        
+                        // Remplir les champs supplémentaires
+                        const moisAssurance = document.getElementById('moisAssurance');
+                        if (moisAssurance) moisAssurance.value = '24';
+                        
+                        const bonusMalus = document.getElementById('bonusMalus');
+                        if (bonusMalus) bonusMalus.value = '0.85';
+                        
+                        // Situation du contrat
+                        const situationResilier = document.querySelector('input[name="situationContrat"][value="resilier"]');
+                        if (situationResilier) {
+                            situationResilier.checked = true;
+                            situationResilier.dispatchEvent(new Event('change'));
+                            
+                            // Date de résiliation
+                            const dateResiliation = document.getElementById('dateResiliation');
+                            if (dateResiliation) {
+                                dateResiliation.value = new Date().toISOString().split('T')[0];
+                            }
+                            
+                            // Motif de résiliation
+                            const motifResiliation = document.getElementById('motifResiliation');
+                            if (motifResiliation) motifResiliation.value = 'changement';
+                        }
+                    }
+                    
+                    // Sinistres
+                    const aEuSinistresOui = document.getElementById('aEuSinistresOui');
+                    if (aEuSinistresOui) {
+                        aEuSinistresOui.checked = true;
+                        const aEuSinistresNon = document.getElementById('aEuSinistresNon');
+                        if (aEuSinistresNon) aEuSinistresNon.checked = false;
+                        
+                        // Déclencher l'événement change pour mettre à jour l'affichage
+                        aEuSinistresOui.dispatchEvent(new Event('change'));
+                        
+                        // Remplir les détails du sinistre
+                        const nombreSinistres = document.getElementById('nombreSinistres');
+                        if (nombreSinistres) {
+                            nombreSinistres.value = '1';
+                            nombreSinistres.dispatchEvent(new Event('change'));
+                            
+                            // Remplir les détails du sinistre après un court délai
+                            setTimeout(() => {
+                                const dateSinistre = document.querySelector('input[name^="dateSinistre"]');
+                                if (dateSinistre) dateSinistre.value = '2023-01-15';
+                                
+                                const natureSinistre = document.querySelector('select[name^="natureSinistre"]');
+                                if (natureSinistre) natureSinistre.value = 'materiel';
+                                
+                                const responsabilite = document.querySelector('input[name^="responsabilite"][value="0"]');
+                                if (responsabilite) responsabilite.checked = true;
+                            }, 100);
+                        }
+                    }
+                    
+                    // Section Proposition
+                    const typeAssurance = document.getElementById('typeAssurance');
+                    if (typeAssurance) typeAssurance.value = 'tous_risques';
+                    
+                    const franchise = document.getElementById('franchise');
+                    if (franchise) franchise.value = '300';
+                    
+                    const fractionnement = document.getElementById('fractionnement');
+                    if (fractionnement) fractionnement.value = 'mensuel';
+                    
+                    const cotisation = document.getElementById('cotisation');
+                    if (cotisation) cotisation.value = '45.00';
+                    
+                    const fraisDossier = document.getElementById('fraisDossier');
+                    if (fraisDossier) fraisDossier.value = '20.00';
+                    
+                    // Date d'effet (demain)
+                    const dateEffet = document.getElementById('dateEffet');
+                    if (dateEffet) {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        dateEffet.value = tomorrow.toISOString().split('T')[0];
+                    }
+                    
+                    // Commentaires
+                    const commentaires = document.getElementById('commentaires');
+                    if (commentaires) commentaires.value = 'Je souhaite souscrire à l\'assurance tous risques avec assistance. Je préfère un paiement mensuel.';
+                    
+                    // Accepter les conditions
+                    const conditions = document.getElementById('conditions');
+                    if (conditions) conditions.checked = true;
+                    
+                    // Faire défiler vers le haut
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    // Afficher un message de confirmation
+                    alert('Le formulaire a été rempli avec des données de test. Vous pouvez maintenant générer le devis.');
+                });
+            } else {
+                console.error('Le bouton de remplissage de test n\'a pas été trouvé');
+            }
+            
+            // Vérifier si un devis est spécifié dans l'URL - APRÈS toute initialisation
+            const urlParams = new URLSearchParams(window.location.search);
+            const devisId = urlParams.get('devisId');
+            
+            console.log('=== DEBUG CHARGEMENT DEVIS ===');
+            console.log('URL actuelle:', window.location.href);
+            console.log('devisId détecté:', devisId);
+            console.log('Fonction chargerDevisExistant disponible:', typeof chargerDevisExistant);
+            
+            if (devisId) {
+                console.log('Tentative de chargement du devis avec ID:', devisId);
+                // Attendre que le DOM soit complètement stable
+                setTimeout(() => {
+                    console.log('Appel à chargerDevisExistant...');
+                    try {
+                        chargerDevisExistant(devisId);
+                    } catch (error) {
+                        console.error('Erreur lors de l\'appel à chargerDevisExistant:', error);
+                    }
+                }, 200);
+            } else {
+                console.log('Aucun devisId dans l\'URL, mode création');
+            }
+        }
+    </script>
+    <script src="js/smtp-server-manager.js"></script>
+</body>
+</html>

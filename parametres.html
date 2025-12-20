@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres - GPA Assurance</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            padding: 0 20px;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background: white;
+        }
+
+        .nav-tab:hover {
+            color: #4f46e5;
+        }
+
+        .tab-content {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .agent-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .agent-info {
+            margin-bottom: 15px;
+        }
+
+        .agent-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .agent-info p {
+            color: #6c757d;
+            margin: 3px 0;
+        }
+
+        .agent-role {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .role-admin {
+            background: #dc2626;
+            color: white;
+        }
+
+        .role-agent {
+            background: #10b981;
+            color: white;
+        }
+
+        .logo-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .logo-upload:hover {
+            border-color: #4f46e5;
+        }
+
+        .logo-preview {
+            max-width: 200px;
+            max-height: 150px;
+            margin: 15px auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: #333;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h1><i class="fas fa-cog"></i> Paramètres</h1>
+                <a href="test-pdf-liste.html" class="btn btn-secondary" style="text-decoration: none; padding: 10px 20px; border-radius: 8px; background-color: #6c757d; color: white; border: none; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-arrow-left"></i> Retour aux devis
+                </a>
+            </div>
+            <p>Gestion des paramètres du système et des utilisateurs</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('profile')">
+                <i class="fas fa-user"></i> Profil
+            </button>
+            <button class="nav-tab" onclick="showTab('cabinet')">
+                <i class="fas fa-building"></i> Cabinet
+            </button>
+            <button class="nav-tab" onclick="showTab('agents')">
+                <i class="fas fa-users"></i> Agents
+            </button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Onglet Profil -->
+            <div id="profile" class="tab-pane active">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-user-shield"></i> Mon Profil
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nom d'utilisateur</label>
+                        <input type="text" class="form-control" id="username" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="email" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nouveau mot de passe</label>
+                        <input type="password" class="form-control" id="newPassword" placeholder="Laisser vide pour ne pas changer">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Confirmer le mot de passe</label>
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="Confirmer le nouveau mot de passe">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="updateProfile()">
+                        <i class="fas fa-save"></i> Mettre à jour
+                    </button>
+                </div>
+            </div>
+
+            <!-- Onglet Cabinet -->
+            <div id="cabinet" class="tab-pane">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-building"></i> Informations du Cabinet
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nom du cabinet</label>
+                        <input type="text" class="form-control" id="cabinetNom">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Adresse</label>
+                        <input type="text" class="form-control" id="cabinetAdresse">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="tel" class="form-control" id="cabinetTelephone">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="cabinetEmail">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>SIRET</label>
+                        <input type="text" class="form-control" id="cabinetSiret">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="updateCabinet()">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-image"></i> Logo du Cabinet
+                    </div>
+                    
+                    <div class="logo-upload" onclick="document.getElementById('logoInput').click()">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #6c757d; margin-bottom: 15px;"></i>
+                        <p>Cliquez pour télécharger le logo</p>
+                        <p style="font-size: 0.9rem; color: #6c757d;">PNG, JPG - Max 10MB</p>
+                        <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+                    </div>
+                    
+                    <img id="logoPreview" class="logo-preview" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Onglet Agents -->
+            <div id="agents" class="tab-pane">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-users"></i> Gestion des Agents
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="showAddAgentModal()">
+                        <i class="fas fa-plus"></i> Ajouter un agent
+                    </button>
+                    
+                    <div id="agentsList" class="agents-grid">
+                        <!-- Les agents seront chargés ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout/Modification Agent -->
+    <div id="agentModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeAgentModal()">&times;</button>
+            <div class="modal-header">
+                <h3 id="modalTitle">Ajouter un agent</h3>
+            </div>
+            
+            <div class="form-group">
+                <label>Nom</label>
+                <input type="text" class="form-control" id="agentLastName">
+            </div>
+            
+            <div class="form-group">
+                <label>Prénom</label>
+                <input type="text" class="form-control" id="agentFirstName">
+            </div>
+            
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-control" id="agentEmail">
+            </div>
+            
+            <div class="form-group">
+                <label>Nom d'utilisateur</label>
+                <input type="text" class="form-control" id="agentUsername">
+            </div>
+            
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" class="form-control" id="agentPassword">
+            </div>
+            
+            <div class="form-group">
+                <label>Rôle</label>
+                <select class="form-control" id="agentRole">
+                    <option value="agent">Agent</option>
+                    <option value="admin">Administrateur</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px; position: sticky; bottom: 0; background: white; padding: 10px 0; border-top: 1px solid #e5e7eb;">
+                <button class="btn btn-primary" onclick="saveAgent()" style="flex: 1;">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+                <button class="btn btn-danger" onclick="closeAgentModal()" style="flex: 1;">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <div id="alert" class="alert"></div>
+
+    <!-- Charger le client d'authentification -->
+    <script src="js/auth-client.js"></script>
+    
+    <script>
+        let currentEditingAgent = null;
+
+        // Afficher un onglet
+        function showTab(tabName) {
+            // Cacher tous les onglets
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            // Désactiver tous les boutons d'onglet
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Afficher l'onglet sélectionné
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Charger les données spécifiques
+            if (tabName === 'agents') {
+                loadAgents();
+            } else if (tabName === 'profile') {
+                loadProfile();
+            } else if (tabName === 'cabinet') {
+                loadCabinetConfig();
+            }
+        }
+
+        // Charger le profil
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById('username').value = data.user.username;
+                        document.getElementById('email').value = data.user.email;
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement du profil:', error);
+            }
+        }
+
+        // Mettre à jour le profil
+        async function updateProfile() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword && newPassword !== confirmPassword) {
+                showAlert('Les mots de passe ne correspondent pas', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/update-profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        password: newPassword || undefined
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Profil mis à jour avec succès', 'success');
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    showAlert(data.message || 'Erreur lors de la mise à jour', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur de connexion au serveur', 'error');
+            }
+        }
+
+        // Charger la configuration du cabinet
+        async function loadCabinetConfig() {
+            try {
+                const response = await fetch('/api/cabinet/config', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        const config = data.config;
+                        document.getElementById('cabinetNom').value = config.nom || '';
+                        document.getElementById('cabinetAdresse').value = config.adresse || '';
+                        document.getElementById('cabinetTelephone').value = config.telephone || '';
+                        document.getElementById('cabinetEmail').value = config.email || '';
+                        document.getElementById('cabinetSiret').value = config.siret || '';
+                        
+                        if (config.logo) {
+                            document.getElementById('logoPreview').src = config.logo;
+                            document.getElementById('logoPreview').style.display = 'block';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de la configuration:', error);
+            }
+        }
+
+        // Mettre à jour la configuration du cabinet
+        async function updateCabinet() {
+            const config = {
+                nom: document.getElementById('cabinetNom').value,
+                adresse: document.getElementById('cabinetAdresse').value,
+                telephone: document.getElementById('cabinetTelephone').value,
+                email: document.getElementById('cabinetEmail').value,
+                siret: document.getElementById('cabinetSiret').value
+            };
+            
+            // Ajouter le logo s'il a été téléchargé
+            if (logoData) {
+                config.logo = logoData;
+            }
+            
+            try {
+                const response = await fetch('/api/cabinet/config', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Configuration du cabinet mise à jour', 'success');
+                    logoData = null; // Réinitialiser après sauvegarde
+                } else {
+                    showAlert(data.message || 'Erreur lors de la mise à jour', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur de connexion au serveur', 'error');
+            }
+        }
+
+        // Gérer le téléchargement du logo
+        let logoData = null;
+        
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 10 * 1024 * 1024) {
+                    showAlert('Le fichier ne doit pas dépasser 10MB', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoData = e.target.result;
+                    document.getElementById('logoPreview').src = logoData;
+                    document.getElementById('logoPreview').style.display = 'block';
+                    
+                    showAlert('Logo téléchargé avec succès. Cliquez sur "Enregistrer" pour sauvegarder.', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Charger les agents
+        async function loadAgents() {
+            try {
+                const response = await fetch('/api/agents', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        displayAgents(data.agents);
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des agents:', error);
+            }
+        }
+
+        // Afficher les agents
+        function displayAgents(agents) {
+            const container = document.getElementById('agentsList');
+            container.innerHTML = '';
+            
+            agents.forEach(agent => {
+                const agentCard = document.createElement('div');
+                agentCard.className = 'agent-card';
+                agentCard.innerHTML = `
+                    <div class="agent-role role-${agent.role}">${agent.role === 'admin' ? 'Administrateur' : 'Agent'}</div>
+                    <div class="agent-info">
+                        <h4>${agent.firstName} ${agent.lastName}</h4>
+                        <p><i class="fas fa-user"></i> ${agent.username}</p>
+                        <p><i class="fas fa-envelope"></i> ${agent.email}</p>
+                        <p><i class="fas fa-calendar"></i> Créé le ${new Date(agent.createdAt).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="editAgent(${agent.id})" style="padding: 8px 15px; font-size: 0.9rem;">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        ${agent.id !== 1 ? `<button class="btn btn-danger" onclick="deleteAgent(${agent.id})" style="padding: 8px 15px; font-size: 0.9rem;">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>` : ''}
+                    </div>
+                `;
+                container.appendChild(agentCard);
+            });
+        }
+
+        // Afficher le modal d'ajout d'agent
+        function showAddAgentModal() {
+            currentEditingAgent = null;
+            document.getElementById('modalTitle').textContent = 'Ajouter un agent';
+            document.getElementById('agentModal').style.display = 'block';
+            clearAgentForm();
+        }
+
+        // Modifier un agent
+        async function editAgent(agentId) {
+            currentEditingAgent = agentId;
+            document.getElementById('modalTitle').textContent = 'Modifier l\'agent';
+            document.getElementById('agentModal').style.display = 'block';
+            
+            try {
+                // Récupérer les données de l'agent depuis l'API
+                const response = await fetch(`/api/agents/${agentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${window.authClient.token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const agent = data.agent;
+                    
+                    // Remplir le formulaire avec les données de l'agent
+                    document.getElementById('agentLastName').value = agent.lastName || '';
+                    document.getElementById('agentFirstName').value = agent.firstName || '';
+                    document.getElementById('agentEmail').value = agent.email || '';
+                    document.getElementById('agentUsername').value = agent.username || '';
+                    document.getElementById('agentPassword').value = ''; // Ne pas afficher le mot de passe
+                    document.getElementById('agentRole').value = agent.role || 'agent';
+                    
+                    console.log('Données agent chargées:', agent);
+                } else {
+                    showAlert('Erreur lors du chargement de l\'agent', 'error');
+                    closeAgentModal();
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de l\'agent:', error);
+                showAlert('Erreur de connexion', 'error');
+                closeAgentModal();
+            }
+        }
+
+        // Fermer le modal
+        function closeAgentModal() {
+            document.getElementById('agentModal').style.display = 'none';
+            clearAgentForm();
+        }
+
+        // Vider le formulaire d'agent
+        function clearAgentForm() {
+            document.getElementById('agentLastName').value = '';
+            document.getElementById('agentFirstName').value = '';
+            document.getElementById('agentEmail').value = '';
+            document.getElementById('agentUsername').value = '';
+            document.getElementById('agentPassword').value = '';
+            document.getElementById('agentRole').value = 'agent';
+        }
+
+        // Enregistrer un agent
+        async function saveAgent() {
+            const agentData = {
+                lastName: document.getElementById('agentLastName').value,
+                firstName: document.getElementById('agentFirstName').value,
+                email: document.getElementById('agentEmail').value,
+                username: document.getElementById('agentUsername').value,
+                password: document.getElementById('agentPassword').value,
+                role: document.getElementById('agentRole').value
+            };
+            
+            try {
+                const url = currentEditingAgent ? `/api/agents/${currentEditingAgent}` : '/api/agents';
+                const method = currentEditingAgent ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(agentData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(currentEditingAgent ? 'Agent modifié avec succès' : 'Agent créé avec succès', 'success');
+                    closeAgentModal();
+                    loadAgents();
+                } else {
+                    showAlert(data.message || 'Erreur lors de l\'opération', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur de connexion au serveur', 'error');
+            }
+        }
+
+        // Supprimer un agent
+        async function deleteAgent(agentId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/agents/${agentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Agent supprimé avec succès', 'success');
+                    loadAgents();
+                } else {
+                    showAlert(data.message || 'Erreur lors de la suppression', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur de connexion au serveur', 'error');
+            }
+        }
+
+        // Afficher une alerte
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProfile();
+        });
+    </script>
+</body>
+</html>
