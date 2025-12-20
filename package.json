@@ -1,0 +1,31 @@
+{
+  "name": "gpa-assurance-auto",
+  "version": "1.0.0",
+  "main": "devis-generator-fixed.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "api": "node server-api.js",
+    "smtp": "node smtp-server.js",
+    "smtp-bat": "start-smtp.bat",
+    "deploy": "bash deploy-lws.sh",
+    "build": "echo 'Build completed'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "jspdf": "^3.0.4",
+    "nodemailer": "^7.0.11",
+    "pdfkit": "^0.17.2"
+  },
+  "description": ""
+}
