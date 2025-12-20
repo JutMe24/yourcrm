@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service d'Envoi Email - GPA Assurance</title>
+    <!-- Charger jsPDF pour générer le PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .email-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .email-info h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .email-info p {
+            color: #7f8c8d;
+            margin: 5px 0;
+        }
+
+        .service-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .service-info h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .service-info p {
+            color: #155724;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .service-info code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 GPA Assurance</h1>
+            <p>Service d'Envoi Email Direct</p>
+        </div>
+
+        <div class="service-info">
+            <h4>🚀 Serveur SMTP Local</h4>
+            <p>Cette page utilise votre serveur SMTP local pour un envoi direct et sécurisé.</p>
+            <p><strong>Assurez-vous que le serveur est démarré:</strong> <code>node smtp-server.js</code></p>
+        </div>
+
+        <div class="email-info" id="emailInfo">
+            <!-- Les informations de l'email seront affichées ici -->
+        </div>
+
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="emailTo">Destinataire</label>
+                <input type="email" id="emailTo" required>
+            </div>
+
+            <div class="form-group">
+                <label for="templateSelect">Template Email</label>
+                <select id="templateSelect" onchange="applyTemplate()">
+                    <option value="">-- Aucun template --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="emailSubject">Sujet</label>
+                <input type="text" id="emailSubject" required>
+            </div>
+
+            <div class="form-group">
+                <label for="emailBody">Message</label>
+                <textarea id="emailBody" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="attachment">Pièce jointe (optionnel)</label>
+                <input type="file" id="attachment" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                <small>Formats acceptés: PDF, Word, Excel, Images</small>
+            </div>
+
+            <button type="submit" class="btn" id="sendBtn">
+                📧 Envoyer l'email
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Envoi de l'email en cours...</p>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // Récupérer les paramètres de l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Charger la configuration SMTP depuis localStorage
+        const smtpConfig = JSON.parse(localStorage.getItem('gpa_email_config') || '{}');
+        
+        // Remplir automatiquement les champs
+        document.getElementById('emailTo').value = urlParams.get('to') || '';
+        document.getElementById('emailSubject').value = urlParams.get('subject') || '';
+        document.getElementById('emailBody').value = urlParams.get('body') || '';
+        
+        // Charger les templates
+        loadTemplates();
+
+        // Fonction pour charger les templates
+        function loadTemplates() {
+            const templates = JSON.parse(localStorage.getItem('gpa_email_templates') || '[]');
+            const select = document.getElementById('templateSelect');
+            
+            select.innerHTML = '<option value="">-- Aucun template --</option>';
+            
+            templates.forEach(template => {
+                const option = document.createElement('option');
+                option.value = template.id;
+                option.textContent = `${template.name} (${template.type})`;
+                select.appendChild(option);
+            });
+        }
+
+        // Fonction pour appliquer un template
+        function applyTemplate() {
+            const templateId = document.getElementById('templateSelect').value;
+            if (!templateId) return;
+            
+            const templates = JSON.parse(localStorage.getItem('gpa_email_templates') || '[]');
+            const template = templates.find(t => t.id === templateId);
+            
+            if (template) {
+                document.getElementById('emailSubject').value = template.subject;
+                document.getElementById('emailBody').value = template.body;
+            }
+        }
+
+        // Afficher les informations de l'email
+        const emailInfo = document.getElementById('emailInfo');
+        emailInfo.innerHTML = `
+            <h3>📋 Email à envoyer</h3>
+            <p><strong>De:</strong> ${urlParams.get('from') || 'Non spécifié'}</p>
+            <p><strong>À:</strong> ${urlParams.get('to') || 'Non spécifié'}</p>
+            <p><strong>Sujet:</strong> ${urlParams.get('subject') || 'Non spécifié'}</p>
+            <p><strong>Serveur:</strong> ${urlParams.get('host') || 'Non spécifié'}:${urlParams.get('port') || 'Non spécifié'}</p>
+        `;
+
+        // Gérer l'envoi du formulaire
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const sendBtn = document.getElementById('sendBtn');
+            const loading = document.getElementById('loading');
+            const status = document.getElementById('status');
+            
+            // Désactiver le bouton et afficher le chargement
+            sendBtn.disabled = true;
+            loading.classList.add('active');
+            status.innerHTML = '';
+            
+            try {
+                // Préparer les données pour l'envoi
+                const emailData = {
+                    host: document.getElementById('smtpHost').value,
+                    port: parseInt(document.getElementById('smtpPort').value),
+                    username: document.getElementById('smtpUsername').value,
+                    password: document.getElementById('smtpPassword').value,
+                    from: document.getElementById('smtpFrom').value,
+                    to: document.getElementById('emailTo').value,
+                    subject: document.getElementById('emailSubject').value,
+                    body: document.getElementById('emailBody').value
+                };
+                
+                console.log('📧 Envoi SMTP direct via serveur local:', emailData);
+                
+                // Envoyer via le serveur SMTP local
+                await sendEmailViaLocalServer(emailData);
+                
+                // Succès
+                status.innerHTML = `
+                    <div class="status success">
+                        ✅ Email envoyé avec succès !
+                        <br><small>L'email a été envoyé à ${emailData.to} via votre serveur SMTP</small>
+                    </div>
+                `;
+                
+                // Fermer la fenêtre après 3 secondes
+                setTimeout(() => {
+                    window.close();
+                }, 3000);
+                
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'envoi:', error);
+                
+                status.innerHTML = `
+                    <div class="status error">
+                        ❌ Erreur lors de l'envoi
+                        <br><small>${error.message}</small>
+                        <br><small>Vérifiez que le serveur SMTP est démarré: <code>node smtp-server.js</code></small>
+                    </div>
+                `;
+            } finally {
+                // Réactiver le bouton et masquer le chargement
+                sendBtn.disabled = false;
+                loading.classList.remove('active');
+            }
+        });
+
+        // Fonction pour générer le PDF depuis les données du devis (identique au formulaire)
+        function generatePDFFromDevis(devisData, devisId) {
+            return new Promise((resolve, reject) => {
+                try {
+                    // Initialiser jsPDF
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4',
+                        compress: true
+                    });
+                    
+                    // Définir la police par défaut
+                    pdf.setFont('helvetica');
+                    
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 15;
+                    const contentWidth = pageWidth - 2 * margin;
+                    let yPos = margin;
+                    
+                    // 1. EN-TÊTE DU DOCUMENT
+                    const headerHeight = 20;
+                    
+                    // Fond bleu foncé en haut de page (#001E50)
+                    pdf.setFillColor(0, 30, 80);
+                    pdf.rect(0, 0, pageWidth, headerHeight, 'F');
+                    
+                    // Logo GPA à gauche
+                    const logoSize = 15;
+                    const logoX = margin;
+                    const logoY = (headerHeight - logoSize) / 2;
+                    
+                    pdf.setFontSize(12);
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.text('GPA', logoX, logoY + 10);
+                    
+                    // Texte "GPA ASSURANCES" à côté du logo
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(12);
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.text('GPA ASSURANCES', logoX + logoSize + 10, logoY + 10);
+                    
+                    // Ligne verticale de séparation
+                    pdf.setDrawColor(255, 255, 255);
+                    pdf.setLineWidth(0.3);
+                    pdf.line(logoX + logoSize + 100, logoY, logoX + logoSize + 100, logoY + logoSize);
+                    
+                    // Informations de contact à droite
+                    const contactX = logoX + logoSize + 120;
+                    pdf.setFontSize(10);
+                    pdf.text('01 23 45 67 89', contactX, logoY + 10);
+                    pdf.text('contact@gpa-assurances.fr', contactX + 80, logoY + 10);
+                    
+                    // 2. INFORMATIONS CLIENT
+                    const clientY = headerHeight + 20;
+                    
+                    // Titre "INFORMATIONS CLIENT"
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(0, 30, 80);
+                    pdf.text('INFORMATIONS CLIENT', margin, clientY);
+                    
+                    // Ligne sous le titre
+                    pdf.setDrawColor(0, 30, 80);
+                    pdf.setLineWidth(0.5);
+                    pdf.line(margin, clientY + 3, margin + 80, clientY + 3);
+                    
+                    // Données du client
+                    const client = devisData.client || {};
+                    const infoClientY = clientY + 20;
+                    
+                    // Nom et prénom en plus grand
+                    pdf.setFontSize(16);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(0, 0, 0);
+                    pdf.text(`${client.nom || 'NOM'} ${client.prenom || 'Prénom'}`.toUpperCase(), margin, infoClientY);
+                    
+                    // Adresse
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(0, 0, 0);
+                    if (client.adresse) {
+                        pdf.text(client.adresse, margin, infoClientY + 8);
+                        if (client.codePostal || client.ville) {
+                            pdf.text(`${client.codePostal || ''} ${client.ville || ''}`.trim(), margin, infoClientY + 15);
+                        }
+                    }
+                    
+                    // Téléphone et email
+                    if (client.telephone || client.email) {
+                        let contactY = infoClientY + 8;
+                        if (client.adresse) contactY += 15;
+                        
+                        if (client.telephone) {
+                            pdf.text(`Téléphone: ${client.telephone}`, margin, contactY);
+                        }
+                        if (client.email) {
+                            pdf.text(`Email: ${client.email}`, margin + 100, contactY);
+                        }
+                    }
+                    
+                    // Calcul de la position Y pour la section suivante
+                    yPos = infoClientY + 35;
+                    if (client.telephone || client.email) {
+                        yPos += 10;
+                    }
+                    
+                    // 3. BLOC INFORMATIONS VÉHICULE
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(0, 30, 80);
+                    pdf.text('INFORMATIONS VÉHICULE', margin, yPos);
+                    
+                    // Ligne sous le titre
+                    pdf.setDrawColor(0, 30, 80);
+                    pdf.setLineWidth(0.5);
+                    pdf.line(margin, yPos + 2, margin + 80, yPos + 2);
+                    
+                    yPos += 10;
+                    
+                    // Carte d'information véhicule (fond gris)
+                    pdf.setFillColor(240, 240, 240);
+                    pdf.roundedRect(margin, yPos, contentWidth, 60, 5, 'F');
+                    
+                    // Icône véhicule
+                    pdf.setFontSize(24);
+                    pdf.setTextColor(0, 30, 80);
+                    pdf.text('🚗', margin + 10, yPos + 20);
+                    
+                    // Informations du véhicule
+                    const vehicule = devisData.vehicule || {};
+                    pdf.setFont('helvetica');
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(0, 0, 0);
+                    
+                    // Données du véhicule
+                    const vehicleData = [
+                        { 
+                            label: 'Marque / Modèle', 
+                            value: `${vehicule.marque || ''} ${vehicule.modele || ''}`.trim() || 'Non renseigné' 
+                        },
+                        { 
+                            label: 'Immatriculation', 
+                            value: vehicule.immatriculation || 'Non renseignée' 
+                        },
+                        { 
+                            label: 'Date 1ère mise en circ.', 
+                            value: vehicule.dateMec || vehicule.dateMiseCirculation || 'Non renseignée' 
+                        },
+                        { 
+                            label: 'Puissance (CV)', 
+                            value: vehicule.puissance || 'Non renseignée' 
+                        },
+                        { 
+                            label: 'Valeur à neuf', 
+                            value: vehicule.valeurNeuve ? `${vehicule.valeurNeuve} €` : 'Non renseignée' 
+                        }
+                    ];
+                    
+                    // Afficher les données du véhicule sur 2 colonnes
+                    vehicleData.forEach((item, index) => {
+                        const col = index % 2;
+                        const row = Math.floor(index / 2);
+                        const x = margin + 30 + (col * (contentWidth / 2 - 10));
+                        const y = yPos + 15 + (row * 8);
+                        
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.text(item.label + ' :', x, y);
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.text(item.value, x + 50, y);
+                    });
+                    
+                    yPos += 70;
+                    
+                    // 4. BLOC GARANTIES INCLUSES
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(0, 30, 80);
+                    pdf.text('GARANTIES INCLUSES', margin, yPos);
+                    
+                    // Ligne sous le titre
+                    pdf.setDrawColor(0, 30, 80);
+                    pdf.setLineWidth(0.5);
+                    pdf.line(margin, yPos + 2, margin + 70, yPos + 2);
+                    
+                    yPos += 10;
+                    
+                    // Liste des garanties avec icônes
+                    const garanties = [
+                        { icon: '🛡️', text: 'Responsabilité Civile' },
+                        { icon: '🔥', text: 'Incendie et Explosion' },
+                        { icon: '💥', text: 'Bris de Glace' },
+                        { icon: '🚗', text: 'Vol et Tentative de Vol' },
+                        { icon: '⚖️', text: 'Défense Pénale et Recours' },
+                        { icon: '🚑', text: 'Assistance 0km' },
+                        { icon: '👥', text: 'Conducteur désigné illimité' },
+                        { icon: '🌍', text: 'Extension de garantie Europe' }
+                    ];
+                    
+                    // Dessiner les garanties sur 2 colonnes
+                    garanties.forEach((garantie, index) => {
+                        const col = index % 2;
+                        const row = Math.floor(index / 2);
+                        const x = margin + (col * (contentWidth / 2 + 5));
+                        const y = yPos + (row * 8);
+                        
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(0, 30, 80);
+                        pdf.text(garantie.icon, x, y);
+                        pdf.setTextColor(0, 0, 0);
+                        pdf.text(garantie.text, x + 15, y);
+                        
+                        // Mettre à jour yPos pour la section suivante
+                        if (index === garanties.length - 1) {
+                            yPos = y + 15;
+                        }
+                    });
+                    
+                    // 5. BLOC TARIFICATION
+                    yPos += 10;
+                    
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(0, 30, 80);
+                    pdf.text('TARIFICATION', margin, yPos);
+                    
+                    // Ligne sous le titre
+                    pdf.setDrawColor(0, 30, 80);
+                    pdf.setLineWidth(0.5);
+                    pdf.line(margin, yPos + 2, margin + 50, yPos + 2);
+                    
+                    yPos += 10;
+                    
+                    // Carte de tarification
+                    pdf.setFillColor(255, 255, 255);
+                    pdf.roundedRect(margin, yPos, contentWidth, 60, 5, 'F');
+                    pdf.setDrawColor(0, 30, 80);
+                    pdf.setLineWidth(1);
+                    pdf.roundedRect(margin, yPos, contentWidth, 60, 5);
+                    
+                    // Détails de la tarification
+                    const cotisation = devisData.cotisation || 0;
+                    const fraisDossier = devisData.fraisDossier || 30;
+                    const total = parseFloat(cotisation) + parseFloat(fraisDossier);
+                    
+                    const tarifs = [
+                        { label: 'Cotisation mensuelle', value: `${(cotisation / 12).toFixed(2)} €` },
+                        { label: 'Frais de dossier', value: `${fraisDossier.toFixed(2)} €` },
+                        { label: 'Total à la souscription', value: `${total.toFixed(2)} €` }
+                    ];
+                    
+                    // Afficher les tarifs
+                    tarifs.forEach((item, index) => {
+                        const isTotal = index === tarifs.length - 1;
+                        const y = yPos + 15 + (index * 15);
+                        
+                        pdf.setFont('helvetica', isTotal ? 'bold' : 'normal');
+                        pdf.setFontSize(isTotal ? 14 : 10);
+                        pdf.setTextColor(0, 0, 0);
+                        pdf.text(item.label, margin + 10, y);
+                        
+                        pdf.setFont('helvetica', isTotal ? 'bold' : 'normal');
+                        pdf.setFontSize(isTotal ? 18 : 12);
+                        pdf.setTextColor(0, 30, 80);
+                        pdf.text(item.value, contentWidth - 10, y, { align: 'right' });
+                        
+                        if (!isTotal) {
+                            pdf.setDrawColor(150, 150, 150);
+                            pdf.setLineWidth(0.2);
+                            pdf.line(margin + 10, y + 5, contentWidth - 10, y + 5);
+                        }
+                    });
+                    
+                    yPos += 70;
+                    
+                    // 6. BLOC DOCUMENTS À FOURNIR
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(0, 30, 80);
+                    pdf.text('DOCUMENTS À FOURNIR', margin, yPos);
+                    
+                    // Ligne sous le titre
+                    pdf.setDrawColor(0, 30, 80);
+                    pdf.setLineWidth(0.5);
+                    pdf.line(margin, yPos + 2, margin + 90, yPos + 2);
+                    
+                    yPos += 10;
+                    
+                    // Liste des documents
+                    const documents = [
+                        { icon: '📝', text: 'Formulaire de souscription dûment rempli et signé' },
+                        { icon: '📄', text: 'Copie recto-verso de la carte grise du véhicule' },
+                        { icon: '🪪', text: 'Copie recto-verso du permis de conduire' },
+                        { icon: '💳', text: 'RIB pour le prélèvement automatique' },
+                        { icon: '📋', text: 'Relevé d\'informations (si disponible)' }
+                    ];
+                    
+                    // Afficher les documents
+                    documents.forEach((doc, index) => {
+                        const y = yPos + (index * 7);
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(0, 30, 80);
+                        pdf.text(doc.icon, margin + 5, y);
+                        pdf.setTextColor(0, 0, 0);
+                        pdf.text(doc.text, margin + 20, y);
+                        
+                        if (index === documents.length - 1) {
+                            yPos = y + 15;
+                        }
+                    });
+                    
+                    // 7. PIED DE PAGE
+                    const footerHeight = 25;
+                    const footerY = pageHeight - footerHeight;
+                    
+                    // Bande bleue en bas
+                    pdf.setFillColor(0, 30, 80);
+                    pdf.rect(0, footerY, pageWidth, footerHeight, 'F');
+                    
+                    // Logo GPA en blanc à gauche
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.text('GPA - Groupe Partenaire des Assurances', margin, footerY + 15);
+                    
+                    // Mentions légales à droite
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.setFont('helvetica', 'normal');
+                    
+                    const legalText = `Cabinet GPA – Groupe Partenaire des Assurances, courtier agréé. Tous droits réservés. | Édité le ${new Date().toLocaleDateString('fr-FR')}`;
+                    
+                    pdf.text(legalText, pageWidth - margin, footerY + 10, { align: 'right' });
+                    
+                    // Numéro de page
+                    pdf.text(`Page 1/1`, pageWidth / 2, footerY + 20, { align: 'center' });
+                    
+                    // Générer le PDF en base64
+                    const pdfBase64 = pdf.output('datauristring').split(',')[1];
+                    console.log('✅ PDF généré depuis le formulaire, taille:', pdfBase64.length);
+                    
+                    resolve(pdfBase64);
+                    
+                } catch (error) {
+                    console.error('❌ Erreur génération PDF:', error);
+                    reject(error);
+                }
+            });
+        }
+
+        // Fonction pour ouvrir la fiche client et télécharger le vrai PDF
+        function downloadRealPDF(devisData, devisId) {
+            return new Promise((resolve, reject) => {
+                try {
+                    console.log('🔧 Ouverture de test-pdf-liste pour télécharger le PDF...');
+                    
+                    // Ouvrir test-pdf-liste.html dans une nouvelle fenêtre
+                    const clientWindow = window.open('test-pdf-liste.html', '_blank', 'width=800,height=600');
+                    
+                    if (!clientWindow) {
+                        reject(new Error('Impossible d\'ouvrir test-pdf-liste'));
+                        return;
+                    }
+                    
+                    // Attendre que la page se charge
+                    const checkLoaded = setInterval(() => {
+                        try {
+                            if (clientWindow.document.readyState === 'complete') {
+                                clearInterval(checkLoaded);
+                                
+                                console.log('📄 test-pdf-liste chargée, recherche du devis...');
+                                
+                                // Chercher le devis dans la liste
+                                setTimeout(() => {
+                                    try {
+                                        // Accéder à la liste des devis
+                                        const devisListe = clientWindow.devisListe;
+                                        if (!devisListe) {
+                                            console.error('❌ Liste des devis non trouvée');
+                                            clientWindow.close();
+                                            reject(new Error('Liste des devis non trouvée'));
+                                            return;
+                                        }
+                                        
+                                        // Chercher le devis correspondant
+                                        const devisTrouve = devisListe.find(d => d.id === devisId);
+                                        if (!devisTrouve) {
+                                            console.error('❌ Devis non trouvé dans la liste:', devisId);
+                                            clientWindow.close();
+                                            reject(new Error('Devis non trouvé'));
+                                            return;
+                                        }
+                                        
+                                        console.log('✅ Devis trouvé:', devisTrouve);
+                                        
+                                        // Simuler un clic sur le bouton de génération PDF pour ce devis
+                                        const pdfButton = clientWindow.document.querySelector(`#generer-pdf-${devisId}`);
+                                        if (!pdfButton) {
+                                            // Chercher un bouton générique
+                                            const allPdfButtons = clientWindow.document.querySelectorAll('[id*="generer-pdf"], [onclick*="generatePDF"]');
+                                            if (allPdfButtons.length > 0) {
+                                                console.log('🔘 Clic sur le bouton PDF trouvé...');
+                                                allPdfButtons[0].click();
+                                            } else {
+                                                console.error('❌ Bouton PDF non trouvé');
+                                                clientWindow.close();
+                                                reject(new Error('Bouton PDF non trouvé'));
+                                                return;
+                                            }
+                                        } else {
+                                            console.log('🔘 Clic sur le bouton PDF spécifique...');
+                                            pdfButton.click();
+                                        }
+                                        
+                                        // Attendre que le PDF soit généré
+                                        setTimeout(() => {
+                                            console.log('✅ PDF généré et téléchargé');
+                                            // Fermer la fenêtre après un délai
+                                            setTimeout(() => {
+                                                clientWindow.close();
+                                                resolve(true);
+                                            }, 1000);
+                                        }, 2000);
+                                        
+                                    } catch (error) {
+                                        console.error('❌ Erreur lors de la recherche du devis:', error);
+                                        clientWindow.close();
+                                        reject(error);
+                                    }
+                                }, 1000);
+                            }
+                        } catch (error) {
+                            clearInterval(checkLoaded);
+                            console.error('❌ Erreur lors du chargement:', error);
+                            clientWindow.close();
+                            reject(error);
+                        }
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error('❌ Erreur ouverture test-pdf-liste:', error);
+                    reject(error);
+                }
+            });
+        }
+
+        // Fonction pour envoyer via le serveur SMTP local
+        async function sendEmailViaLocalServer(emailData) {
+            try {
+                // Récupérer les données du devis depuis l'URL
+                const devisId = urlParams.get('devisId');
+                const devisDataStr = urlParams.get('devisData');
+                let devisData = null;
+                
+                console.log('🔍 Récupération des données du devis:');
+                console.log('  - devisId:', devisId);
+                console.log('  - devisDataStr length:', devisDataStr ? devisDataStr.length : 'null');
+                
+                if (devisDataStr) {
+                    try {
+                        devisData = JSON.parse(decodeURIComponent(devisDataStr));
+                        console.log('✅ devisData parsé avec succès');
+                        console.log('📋 Aperçu des données:', {
+                            client: devisData.client,
+                            vehicule: devisData.vehicule,
+                            cotisation: devisData.cotisation
+                        });
+                    } catch (e) {
+                        console.error('❌ Erreur parsing devisData:', e);
+                        console.error('❌ devisDataStr (premier 200 chars):', devisDataStr.substring(0, 200));
+                    }
+                } else {
+                    console.log('⚠️ devisDataStr est null ou vide');
+                }
+                
+                // Télécharger le vrai PDF depuis la fiche client
+                let pdfGenerated = false;
+                if (devisData) {
+                    console.log('📄 Téléchargement du PDF depuis la fiche client...');
+                    try {
+                        pdfGenerated = await downloadRealPDF(devisData, devisId);
+                        console.log('✅ PDF téléchargé avec succès:', pdfGenerated);
+                    } catch (pdfError) {
+                        console.error('❌ Erreur téléchargement PDF:', pdfError);
+                        // Continuer sans PDF si erreur
+                    }
+                }
+                
+                // Préparer les données complètes pour le serveur
+                const fullEmailData = {
+                    ...emailData,
+                    devisId: devisId,
+                    devisData: devisData,
+                    pdfGenerated: pdfGenerated // Indiquer que le PDF a été généré
+                };
+                
+                console.log('📧 Envoi avec pièce jointe PDF:', { 
+                    devisId: devisId, 
+                    hasDevisData: !!devisData,
+                    pdfGenerated: pdfGenerated,
+                    emailDataKeys: Object.keys(emailData)
+                });
+                
+                const response = await fetch('http://localhost:3001/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(fullEmailData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur du serveur SMTP');
+                }
+                
+                const result = await response.json();
+                console.log('✅ Réponse du serveur SMTP:', result);
+                
+                return result;
+                
+            } catch (error) {
+                console.error('❌ Erreur de communication avec le serveur:', error);
+                
+                if (error.message.includes('fetch')) {
+                    throw new Error('Serveur SMTP local inaccessible. Démarrez-le avec: node smtp-server.js');
+                }
+                
+                throw error;
+            }
+        }
+    </script>
+</body>
+</html>

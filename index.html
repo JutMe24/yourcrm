@@ -3,60 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPA Assurance</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f5f5f5;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #4CAF50;
-            margin-top: 0;
-        }
-        .status {
-            margin: 20px 0;
-            padding: 10px;
-            background: #e8f5e9;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-    </style>
+    <meta name="theme-color" content="#4CAF50">
+    <title>GPA - Proposition d'Assurance Auto Professionnelle</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="GPA Assurance">
+    <meta name="apple-mobile-web-app-title" content="GPA">
+    <meta name="msapplication-starturl" content="/">
 </head>
 <body>
     <div class="container">
-        <h1>GPA Assurance</h1>
-        <p>Bienvenue sur l'application GPA Assurance</p>
-        <div class="status" id="status">Vérification de la connexion au serveur...</div>
-        <p>Le serveur fonctionne correctement !</p>
+        <!-- Barre de navigation -->
+        <nav class="main-nav">
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active">Nouveau devis</a>
+                <a href="devis-liste.html" class="nav-link">Liste des devis</a>
+            </div>
+            <div class="nav-controls">
+                <button id="smtp-server-btn" class="btn btn-sm btn-secondary">
+                    <i class="icon-server"></i> <span id="smtp-server-text">Démarrer le serveur SMTP</span>
+                </button>
+                <span id="smtp-server-status" class="server-status server-stopped">● Arrêté</span>
+            </div>
+        </nav>
+        
+        <!-- En-tête avec logo -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="logo-upload">
+                    <label for="logo-upload" class="logo-upload-label">
+                        <img id="logo-preview" src="" alt="Logo du cabinet" style="max-height: 100px; display: none;">
+                        <div class="logo-placeholder" id="logo-placeholder">
+                            <span>+ Télécharger le logo</span>
+                            <small>Format recommandé : 200x60px</small>
+                        </div>
+                        <input type="file" id="logo-upload" accept="image/*" style="display: none;">
+                    </label>
+                </div>
+                <div class="header-info">
+                    <h1>PROPOSITION D'ASSURANCE AUTO PROFESSIONNELLE</h1>
+                    <p>Date : <span id="current-date"></span></p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Section Informations Client -->
+            <section class="form-section">
+                <h2>INFORMATIONS CLIENT</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nom">Nom / Raison sociale :</label>
+                        <input type="text" id="nom" name="nom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom">Prénom :</label>
+                        <input type="text" id="prenom" name="prenom">
+                    </div>
+                    <div class="form-group">
+                        <label for="adresse">Adresse :</label>
+                        <input type="text" id="adresse" name="adresse" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cp">Code postal :</label>
+                        <input type="text" id="cp" name="cp" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ville">Ville :</label>
+                        <input type="text" id="ville" name="ville" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telephone">Téléphone :</label>
+                        <input type="tel" id="telephone" name="telephone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email :</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Informations Véhicule -->
+            <section class="form-section">
+                <h2>INFORMATIONS VÉHICULE</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="marque">Marque :</label>
+                        <input type="text" id="marque" name="marque" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modele">Modèle :</label>
+                        <input type="text" id="modele" name="modele" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="immatriculation">Immatriculation :</label>
+                        <input type="text" id="immatriculation" name="immatriculation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date-mec">Date 1ère Mise en Circulation :</label>
+                        <input type="date" id="date-mec" name="date-mec" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="puissance">Puissance (CV) :</label>
+                        <input type="number" id="puissance" name="puissance" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date-achat">Date d'achat du véhicule :</label>
+                        <input type="date" id="date-achat" name="date-achat" required>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Formules d'Assurance -->
+            <section class="form-section">
+                <h2>FORMULE D'ASSURANCE</h2>
+                <div class="form-group">
+                    <label>Sélectionnez une formule :</label>
+                    <div class="formule-options">
+                        <div class="formule-option">
+                            <input type="radio" id="formule-tiers-simple" name="formule" value="tiers-simple" required>
+                            <label for="formule-tiers-simple">Tiers Simple</label>
+                            <div class="formule-details" id="details-tiers-simple">
+                                <ul>
+                                    <li>Responsabilité civile matérielle automobile</li>
+                                    <li>Responsabilité civile corporelle automobile</li>
+                                    <li>Défense pénale et recours suite à accident</li>
+                                    <li>Garantie corporelle du conducteur 300K€</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="formule-option">
+                            <input type="radio" id="formule-tiers-bris" name="formule" value="tiers-bris">
+                            <label for="formule-tiers-bris">Tiers Bris de Glace</label>
+                            <div class="formule-details" id="details-tiers-bris">
+                                <ul>
+                                    <li>Responsabilité civile matérielle automobile</li>
+                                    <li>Responsabilité civile corporelle automobile</li>
+                                    <li>Défense pénale et recours suite à accident</li>
+                                    <li>Garantie corporelle du conducteur 300K€</li>
+                                    <li>Bris de glace</li>
+                                    <li>Catastrophes naturelles</li>
+                                    <li>Catastrophes technologiques</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="formule-option">
+                            <input type="radio" id="formule-tiers-incendie-vol" name="formule" value="tiers-incendie-vol">
+                            <label for="formule-tiers-incendie-vol">Tiers Incendie Vol</label>
+                            <div class="formule-details" id="details-tiers-incendie-vol">
+                                <ul>
+                                    <li>Responsabilité civile matérielle automobile</li>
+                                    <li>Responsabilité civile corporelle automobile</li>
+                                    <li>Défense pénale et recours suite à accident</li>
+                                    <li>Bris de glace</li>
+                                    <li>Catastrophes naturelles</li>
+                                    <li>Catastrophes technologiques</li>
+                                    <li>Attentats/Terrorisme</li>
+                                    <li>Vol</li>
+                                    <li>Incendie/Événements climatiques</li>
+                                    <li>Garantie corporelle du conducteur 300K€</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="formule-option">
+                            <input type="radio" id="formule-tous-risques" name="formule" value="tous-risques">
+                            <label for="formule-tous-risques">Tous Risques</label>
+                            <div class="formule-details" id="details-tous-risques">
+                                <ul>
+                                    <li>Responsabilité civile matérielle automobile</li>
+                                    <li>Responsabilité civile corporelle automobile</li>
+                                    <li>Défense pénale et recours suite à accident</li>
+                                    <li>Bris de glace</li>
+                                    <li>Catastrophes naturelles</li>
+                                    <li>Catastrophes technologiques</li>
+                                    <li>Attentats/Terrorisme</li>
+                                    <li>Vol</li>
+                                    <li>Incendie/Événements climatiques</li>
+                                    <li>Garantie corporelle du conducteur 300K€</li>
+                                    <li>Dommages tous accidents</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="franchise">Franchise (€) :</label>
+                    <select id="franchise" name="franchise" class="select-custom">
+                        <option value="300">300 €</option>
+                        <option value="500" selected>500 €</option>
+                        <option value="750">750 €</option>
+                        <option value="1000">1 000 €</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Section Conducteurs -->
+            <section class="form-section">
+                <h2>CONDUCTEURS HABITUELS</h2>
+                <div class="form-group">
+                    <label for="bonus-malus">Bonus/Malus :</label>
+                    <input type="text" id="bonus-malus" name="bonus-malus" placeholder="Ex: 0,75 (sans accident)" required>
+                </div>
+                <div id="conducteurs-container">
+                    <!-- Les conducteurs seront ajoutés ici dynamiquement -->
+                </div>
+                <button type="button" id="ajouter-conducteur" class="btn btn-secondary">+ Ajouter un conducteur</button>
+            </section>
+
+            <!-- Section Antécédents -->
+            <section class="form-section">
+                <h2>ANTÉCÉDENTS (SINISTRES 3 DERNIÈRES ANNÉES)</h2>
+                <div id="antecedents-container">
+                    <!-- Les antécédents seront ajoutés ici dynamiquement -->
+                </div>
+                <button type="button" id="ajouter-antecedent" class="btn btn-secondary">+ Ajouter un antécédent</button>
+            </section>
+
+            <!-- Section Montants -->
+            <section class="form-section montants">
+                <h2>MONTANT DE LA COTISATION</h2>
+                
+                <div class="form-group">
+                    <label for="cotisation">Montant annuel TTC :</label>
+                    <input type="number" id="cotisation" name="cotisation" required>
+                    <span>€</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fractionnement">Mode de paiement :</label>
+                    <select id="fractionnement" name="fractionnement" class="select-custom">
+                        <option value="annuel">Paiement annuel (1 fois par an)</option>
+                        <option value="trimestriel">Paiement trimestriel (4 fois sans frais)</option>
+                        <option value="mensuel">Paiement mensuel (10 mensualités sans frais)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="frais">Frais de dossier :</label>
+                    <input type="number" id="frais" name="frais" value="30" required>
+                    <span>€</span>
+                </div>
+                
+                <div class="form-group total">
+                    <label for="total">TOTAL TTC :</label>
+                    <input type="number" id="total" name="total" readonly>
+                    <span>€</span>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button type="button" id="generer-pdf" class="btn btn-primary">
+                    <i class="icon-pdf"></i> Télécharger la proposition en PDF
+                </button>
+                <button type="reset" class="btn btn-secondary">Réinitialiser le formulaire</button>
+            </div>
+        </main>
+
+        <!-- Section Informations du Cabinet -->
+        <section class="form-section cabinet-info">
+            <h2>INFORMATIONS DU CABINET GPA</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="cabinet-nom">Nom du cabinet :</label>
+                    <input type="text" id="cabinet-nom" name="cabinet-nom" value="GPA - Groupe Partenaire des Assurances" required>
+                </div>
+                <div class="form-group">
+                    <label for="cabinet-adresse">Adresse :</label>
+                    <input type="text" id="cabinet-adresse" name="cabinet-adresse" required>
+                </div>
+                <div class="form-group">
+                    <label for="cabinet-cp">Code postal :</label>
+                    <input type="text" id="cabinet-cp" name="cabinet-cp" required>
+                </div>
+                <div class="form-group">
+                    <label for="cabinet-ville">Ville :</label>
+                    <input type="text" id="cabinet-ville" name="cabinet-ville" required>
+                </div>
+                <div class="form-group">
+                    <label for="cabinet-telephone">Téléphone :</label>
+                    <input type="tel" id="cabinet-telephone" name="cabinet-telephone" required>
+                </div>
+                <div class="form-group">
+                    <label for="cabinet-email">Email :</label>
+                    <input type="email" id="cabinet-email" name="cabinet-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="cabinet-rcs">RCS :</label>
+                    <input type="text" id="cabinet-rcs" name="cabinet-rcs" required>
+                </div>
+                <div class="form-group">
+                    <label for="cabinet-orias">N° ORIAS :</label>
+                    <input type="text" id="cabinet-orias" name="cabinet-orias" required>
+                </div>
+                <div class="form-actions" style="grid-column: 1 / -1; margin-top: 15px;">
+                    <button type="button" id="sauvegarder-cabinet" class="btn btn-primary">
+                        <i class="icon-save"></i> Sauvegarder les informations
+                    </button>
+                    <span id="sauvegarde-message" style="margin-left: 15px; color: green; display: none;">
+                        <i class="icon-check"></i> Informations sauvegardées avec succès !
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 id="footer-cabinet-nom">Groupe Partenaire des Assurances</h3>
+                    <p>Votre partenaire en assurances professionnelles</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Coordonnées</h4>
+                    <p><i class="icon-address"></i> <span id="footer-cabinet-adresse">123 Avenue des Assurances, 75000 Paris</span></p>
+                    <p><i class="icon-phone"></i> <span id="footer-cabinet-telephone">01 23 45 67 89</span></p>
+                    <p><i class="icon-email"></i> <span id="footer-cabinet-email">contact@gpa-assurances.fr</span></p>
+                </div>
+                <div class="footer-section">
+                    <h4>Informations légales</h4>
+                    <p>RCS <span id="footer-cabinet-rcs">Paris 123 456 789</span></p>
+                    <p>N° ORIAS : <span id="footer-cabinet-orias">07 123 456</span></p>
+                    <p>www.gpa-assurances.fr</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="current-year">2023</span> <span id="footer-cabinet-nom2">Groupe Partenaire des Assurances</span> - Tous droits réservés</p>
+            </div>
+        </footer>
     </div>
 
+    <!-- Scripts JS -->
     <script>
-        // Vérifier la connexion à l'API
-        fetch('/api/status')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('status').textContent = 
-                    `Statut du serveur: ${data.status} - ${data.message}`;
-                document.getElementById('status').style.background = '#e8f5e9';
-            })
-            .catch(error => {
-                document.getElementById('status').textContent = 
-                    'Erreur de connexion au serveur: ' + error.message;
-                document.getElementById('status').style.background = '#ffebee';
+        // Enregistrement du Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker enregistré avec succès');
+                        window.serviceWorkerRegistration = registration;
+                    })
+                    .catch(err => console.error("Erreur d'enregistrement du ServiceWorker: ", err));
             });
+        }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        // Vérification du chargement des bibliothèques
+        if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+            console.error('Erreur: La bibliothèque jsPDF n\'est pas chargée correctement');
+        } else {
+            if (window.jspdf && window.jspdf.jsPDF) {
+                window.jsPDF = window.jspdf.jsPDF;
+            }
+        }
+        
+        if (typeof html2canvas === 'undefined') {
+            console.error('Erreur: La bibliothèque html2canvas n\'est pas chargée correctement');
+        }
+        
+        // Initialisation de l'événement de clic sur le bouton de génération de PDF
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateButton = document.getElementById('generer-pdf');
+            if (generateButton) {
+                generateButton.addEventListener('click', function() {
+                    // Vérification des bibliothèques
+                    if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+                        alert('Erreur: La bibliothèque PDF n\'est pas chargée correctement');
+                        console.error('jsPDF non chargé');
+                        return false;
+                    }
+                    
+                    // Appel de la fonction generatePDF du fichier pdf-utils.js
+                    if (typeof window.generatePDF === 'function') {
+                        window.generatePDF();
+                    } else {
+                        console.error('La fonction generatePDF n\'est pas disponible');
+                        alert('Erreur: Impossible de générer le PDF. La fonction de génération est introuvable.');
+                    }
+                });
+            }
+            
+            // Mettre à jour l'année dans le footer
+            const currentYear = new Date().getFullYear();
+            document.getElementById('current-year').textContent = currentYear;
+            
+            // Initialiser les événements du formulaire
+            if (typeof initializeFormEvents === 'function') {
+                initializeFormEvents();
+            }
+            
+            // Charger les informations du cabinet
+            if (typeof loadCabinetInfo === 'function') {
+                loadCabinetInfo();
+            }
+            
+            // Gestion du téléchargement du logo
+            const logoUpload = document.getElementById('logo-upload');
+            const logoPreview = document.getElementById('logo-preview');
+            const logoPlaceholder = document.getElementById('logo-placeholder');
+            
+            if (logoUpload && logoPreview && logoPlaceholder) {
+                logoUpload.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // Vérification du type de fichier
+                        if (!file.type.match('image.*')) {
+                            alert('Veuillez sélectionner un fichier image valide (JPEG, PNG, etc.)');
+                            return;
+                        }
+                        
+                        // Vérification de la taille du fichier (max 2MB)
+                        if (file.size > 2 * 1024 * 1024) {
+                            alert('La taille du fichier ne doit pas dépasser 2MB');
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            // Mise à jour de l'aperçu du logo
+                            logoPreview.src = e.target.result;
+                            logoPreview.style.display = 'block';
+                            logoPreview.style.maxHeight = '100px';
+                            logoPreview.style.maxWidth = '200px';
+                            logoPlaceholder.style.display = 'none';
+                            
+                            // Stocker le logo dans le stockage local pour persistance
+                            try {
+                                localStorage.setItem('gpaCabinetLogo', e.target.result);
+                                console.log('Logo sauvegardé avec succès');
+                            } catch (err) {
+                                console.error('Erreur lors de la sauvegarde du logo:', err);
+                            }
+                        };
+                        
+                        reader.onerror = function() {
+                            console.error('Erreur lors de la lecture du fichier');
+                            alert('Une erreur est survenue lors de la lecture du fichier');
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            // Mise à jour des informations du footer avec les données du formulaire
+            if (typeof updateFooterInfo === 'function') {
+                updateFooterInfo();
+            }
+        });
+    </script>
+    <script src="js/script.js"></script>
+    <script src="js/pdf-utils.js"></script>
+    <script src="js/pdf-generator.js"></script>
+    <script src="js/smtp-server-manager.js"></script>
+    <script src="rappel-manager.js"></script>
 </body>
 </html>

@@ -1,0 +1,1 @@
+{"host": "smtp.votredomaine.com", "port": 587, "username": "votre.email@votredomaine.com", "password": "votremotdepasse", "from": "votre.email@votredomaine.com", "to": "test@example.com", "subject": "Test SMTP Pro", "body": "Test depuis votre domaine pro"}

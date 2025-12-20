@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des devis - GPA Assurance Auto</title>
+    <!-- Mêmes styles que test-pdf.html -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #ed8936;
+            --accent-color: #2c5282;
+            --text-color: #2d3748;
+            --light-gray: #f7fafc;
+            --medium-gray: #e2e8f0;
+            --dark-gray: #4a5568;
+            --success-color: #38a169;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f7fa;
+        }
+
+        /* Barre de navigation */
+        .main-nav {
+            background: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+        }
+
+        .nav-link {
+            display: inline-block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            opacity: 0.8;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+
+        .nav-link.active {
+            opacity: 1;
+            border-bottom-color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* En-tête de page */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        /* Barre de recherche et filtres */
+        .search-filter-bar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--dark-gray);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+            outline: none;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            white-space: nowrap;
+        }
+
+        .filter-select {
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            background-color: white;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a5568'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%;
+            background-size: 1em auto;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+            outline: none;
+        }
+
+        /* Cartes de statistiques */
+        .devis-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        /* Grille des devis */
+        .devis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .devis-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .devis-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Couleurs de fond selon le statut */
+        .devis-card.statut-brouillon {
+            background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
+            border-left: 4px solid #ff9500; /* Orange */
+        }
+        
+        .devis-card.statut-genere {
+            background: #ffffff; /* Blanc */
+            border-left: 4px solid transparent;
+        }
+        
+        .devis-card.statut-envoye {
+            background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+            border-left: 4px solid #007aff; /* Bleu */
+        }
+        
+        .devis-card.statut-accepte {
+            background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+            border-left: 4px solid #34c759; /* Vert */
+        }
+        
+        .devis-card.statut-refuse {
+            background: linear-gradient(135deg, #fff0f0 0%, #ffffff 100%);
+            border-left: 4px solid #ff3b30; /* Rouge */
+        }
+
+        /* Couleurs de fond pour les cartes de statistiques du tableau de bord */
+        .stat-card.stat-total {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-left: 4px solid #6c757d;
+        }
+        
+        .stat-card.stat-refuses {
+            background: linear-gradient(135deg, #fff0f0 0%, #ffffff 100%);
+            border-left: 4px solid #ff3b30;
+        }
+        
+        .stat-card.stat-acceptes {
+            background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+            border-left: 4px solid #34c759;
+        }
+        
+        .stat-card.stat-taux {
+            background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+            border-left: 4px solid #007aff;
+        }
+        
+        .stat-card.stat-ca {
+            background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
+            border-left: 4px solid #ff9500;
+        }
+
+        .devis-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.25rem;
+            position: relative;
+        }
+
+        .devis-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .devis-client {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .devis-vehicule {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .devis-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .devis-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--dark-gray);
+            margin-bottom: 0.2rem;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .devis-montant {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: auto 0 1.5rem;
+            padding: 1rem 0;
+            border-top: 1px solid var(--medium-gray);
+            border-bottom: 1px solid var(--medium-gray);
+            width: 100%;
+        }
+
+        .devis-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-icon-only {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            position: relative;
+        }
+        
+        .btn-icon-only:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-icon-only i {
+            margin: 0;
+        }
+        
+        /* Tooltip pour les boutons icônes */
+        .btn-icon-only::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+        }
+        
+        .btn-icon-only:hover::after {
+            opacity: 1;
+        }
+        
+        .btn-icon-view {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .btn-icon-view:hover {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .btn-icon-send {
+            background: #e8f5e8;
+            color: #27ae60;
+        }
+        
+        .btn-icon-send:hover {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-icon-download {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .btn-icon-download:hover {
+            background: #f57c00;
+            color: white;
+        }
+        
+        .btn-icon-delete {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .btn-icon-delete:hover {
+            background: #d32f2f;
+            color: white;
+        }
+        
+        /* Styles pour la liste déroulante de statut */
+        .status-select {
+            width: 100%;
+            padding: 0.4rem 0.8rem;
+            border: 2px solid var(--medium-gray);
+            border-radius: 6px;
+            background: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        
+        .status-select:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
+        }
+        
+        .status-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.2);
+        }
+        
+        .status-select option {
+            padding: 0.5rem;
+            font-weight: 400;
+        }
+        
+        /* Couleurs pour différents statuts */
+        .status-brouillon {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .status-généré {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .status-envoyé {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .status-accepté {
+            background: #e8f5e8;
+            color: #27ae60;
+        }
+        
+        .status-refusé {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem 0;
+            border-top: 1px solid var(--medium-gray);
+        }
+
+        .pagination-info {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            background: white;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--light-gray);
+            border-color: var(--dark-gray);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .page-number {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-number:hover:not(.active) {
+            background: var(--light-gray);
+        }
+
+        .page-number.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* État vide */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin: 0 auto;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--medium-gray);
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .empty-state p {
+            color: var(--dark-gray);
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .devis-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+            
+            .devis-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filters {
+                flex-direction: column;
+                width: 100%;
+                gap: 1rem;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .devis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .devis-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .pagination-container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .devis-actions {
+                flex-direction: column;
+            }
+            
+            .devis-actions .btn {
+                width: 100%;
+            }
+            
+            .pagination-controls {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Conteneur principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* En-tête */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--dark-gray);
+            font-weight: 400;
+        }
+
+        /* Liste des devis */
+        .devis-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .devis-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .devis-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .devis-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+        }
+
+        .devis-client {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .devis-vehicule {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .devis-body {
+            padding: 1.5rem;
+        }
+
+        .devis-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--dark-gray);
+            margin-bottom: 0.2rem;
+            display: block;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .devis-montant {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 1rem 0;
+            padding: 1rem 0;
+            border-top: 1px solid var(--medium-gray);
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .devis-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #12243f;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: rgba(26, 54, 93, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 50%;
+        }
+
+        /* État vide */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--medium-gray);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: var(--dark-gray);
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .devis-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .devis-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .devis-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Styles pour la modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #eee;
+            background-color: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+        
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #eee;
+            background-color: #f8f9fa;
+            border-radius: 0 0 8px 8px;
+            text-align: right;
+        }
+        
+        .detail-section {
+            margin-bottom: 30px;
+        }
+        
+        .detail-section h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .detail-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .detail-item label {
+            display: block;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .detail-item .value {
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .montant-cotisation {
+            background: #e8f5e8;
+            border: 2px solid #27ae60;
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+    </style>
+    <!-- Charger jsPDF en premier -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Déclarer la variable globale pour jsPDF
+        window.jspdf = window.jspdf || {};
+        window.jsPDF = window.jspdf.jsPDF;
+    </script>
+    <!-- Charger le générateur de devis corrigé -->
+    <script src="devis-generator-fixed.js"></script>
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="test-pdf.html" class="nav-link">Nouveau devis</a>
+            <a href="test-pdf-liste.html" class="nav-link active">Liste des devis</a>
+            <a href="email-config.html" class="nav-link">
+                <i class="fas fa-cog"></i> Configuration Email
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="page-title">Liste des devis</h1>
+                    <p class="page-subtitle">Consultez et gérez tous vos devis enregistrés</p>
+                </div>
+                <a href="test-pdf.html" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau devis
+                </a>
+            </div>
+            
+            <!-- Barre de recherche et filtres -->
+            <div class="search-filter-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Rechercher un devis...">
+                </div>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="statusFilter">Statut :</label>
+                        <select id="statusFilter" class="filter-select">
+                            <option value="all">Tous les statuts</option>
+                            <option value="Généré">Généré</option>
+                            <option value="Envoyé">Envoyé</option>
+                            <option value="Accepté">Accepté</option>
+                            <option value="Refusé">Refusé</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="sortBy">Trier par :</label>
+                        <select id="sortBy" class="filter-select">
+                            <option value="date-desc">Date (récent au + ancien)</option>
+                            <option value="date-asc">Date (ancien au + récent)</option>
+                            <option value="montant-desc">Montant (décroissant)</option>
+                            <option value="montant-asc">Montant (croissant)</option>
+                            <option value="nom-asc">Nom (A-Z)</option>
+                            <option value="nom-desc">Nom (Z-A)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="devis-stats">
+            <div class="stat-card stat-total">
+                <div class="stat-value" id="totalDevis">0</div>
+                <div class="stat-label">Devis au total</div>
+            </div>
+            <div class="stat-card stat-refuses">
+                <div class="stat-value" id="devisRefuses">0</div>
+                <div class="stat-label">Refusés</div>
+            </div>
+            <div class="stat-card stat-acceptes">
+                <div class="stat-value" id="devisAcceptes">0</div>
+                <div class="stat-label">Acceptés</div>
+            </div>
+            <div class="stat-card stat-taux">
+                <div class="stat-value" id="tauxConcretisation">0%</div>
+                <div class="stat-label">Taux de concrétisation</div>
+            </div>
+            <div class="stat-card stat-ca">
+                <div class="stat-value" id="chiffreAffaire">0 €</div>
+                <div class="stat-label">Chiffre d'affaires</div>
+            </div>
+        </div>
+
+        <div id="devis-list" class="devis-grid">
+            <!-- Les devis seront chargés ici dynamiquement -->
+        </div>
+
+        <div class="pagination-container">
+            <div class="pagination-info" id="paginationInfo">Aucun devis trouvé</div>
+            <div class="pagination-controls">
+                <button id="prevPage" class="pagination-btn" disabled>
+                    <i class="fas fa-chevron-left"></i> Précédent
+                </button>
+                <div class="page-numbers" id="pageNumbers"></div>
+                <button id="nextPage" class="pagination-btn" disabled>
+                    Suivant <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour afficher les détails du devis -->
+    <div id="devis-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Détails du Devis</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="devis-details">
+                <!-- Les détails du devis seront affichés ici -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Fermer</button>
+                <button class="btn btn-primary" id="generer-pdf">Générer PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fonctions globales accessibles depuis les onclick
+        function envoyerDevisParEmail(devisId, emailClient) {
+            console.log('=== DÉBUT ENVOI EMAIL DEVIS (ENVOI DIRECT) ===');
+            console.log('Devis ID:', devisId);
+            console.log('Email client:', emailClient);
+            console.log('Email client valide?', emailClient && emailClient.includes('@'));
+            
+            // Vérifier si la configuration email existe
+            const config = loadEmailConfig();
+            console.log('Config email trouvée:', config ? 'Oui' : 'Non');
+            
+            if (!config) {
+                console.log('ERREUR: Pas de configuration email');
+                showStatus('⚠️ Veuillez configurer votre email professionnel d\'abord', 'warning');
+                setTimeout(() => {
+                    window.location.href = 'email-config.html';
+                }, 2000);
+                return;
+            }
+            
+            // Vérifier si c'est une configuration SMTP
+            if (config.type !== 'smtp') {
+                console.log('ERREUR: Configuration non SMTP, type:', config.type);
+                showStatus('⚠️ Veuillez reconfigurer avec les paramètres SMTP', 'warning');
+                setTimeout(() => {
+                    window.location.href = 'email-config.html';
+                }, 2000);
+                return;
+            }
+            
+            // Vérifier si l'email du client est disponible
+            if (!emailClient || !emailClient.includes('@')) {
+                console.log('ERREUR: Email client invalide:', emailClient);
+                showStatus('❌ L\'email du client n\'est pas valide', 'error');
+                setTimeout(() => {
+                    alert('❌ Email client invalide\n\nL\'email du client n\'est pas valide ou n\'est pas renseigné.\n\nEmail trouvé: "' + emailClient + '"\n\nSolution:\n1. Cliquez sur "Voir" pour modifier le devis\n2. Ajoutez une adresse email valide (ex: client@email.com)\n3. Sauvegardez et réessayez');
+                }, 1000);
+                return;
+            }
+            
+            // Récupérer les informations du devis
+            const devisListe = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+            const devis = devisListe.find(d => d.id === devisId);
+            
+            console.log('Devis trouvé:', devis ? 'Oui' : 'Non');
+            console.log('Total devis dans la liste:', devisListe.length);
+            
+            if (!devis) {
+                console.log('ERREUR: Devis non trouvé avec ID:', devisId);
+                console.log('IDs disponibles:', devisListe.map(d => d.id));
+                showStatus('❌ Devis non trouvé', 'error');
+                return;
+            }
+            
+            console.log('Configuration SMTP:', {
+                provider: config.providerName,
+                host: config.host,
+                port: config.port,
+                from: config.from,
+                username: config.username
+            });
+            
+            showStatus('📧 Préparation de l\'envoi direct...', 'warning');
+            
+            try {
+                // Construire le sujet et le corps de l'email
+                const client = devis.client || {};
+                const cotisation = devis.infosComplementaires?.cotisation || devis.cotisation || 0;
+                const dateEffet = devis.dateEffet || devis.infosComplementaires?.dateEffet || '-';
+                const typeAssurance = devis.typeAssurance || devis.infosComplementaires?.typeAssurance || '-';
+                
+                console.log('Données client:', client);
+                console.log('Cotisation:', cotisation);
+                
+                const sujet = `🚗 Votre devis auto - GPA Assurance - ${client.nom || 'Client'}`;
+                
+                const corpsEmail = `
+Bonjour ${client.prenom || ''} ${client.nom || ''},
+
+Merci de votre confiance pour votre assurance automobile.
+
+Vous trouverez ci-dessous le récapitulatif de votre devis :
+
+📋 RÉCAPITULATIF DE VOTRE DEVIS
+================================
+Client : ${client.nom || ''} ${client.prenom || ''}
+Véhicule : ${devis.vehicule?.marque || ''} ${devis.vehicule?.modele || ''}
+Formule : ${typeAssurance}
+Date d'effet : ${dateEffet}
+Cotisation annuelle : ${formaterMontant(cotisation)}
+
+N'hésitez pas à nous contacter pour toute question ou pour finaliser votre contrat.
+
+📞 Appelez-nous : ${config.phoneNumber || 'Numéro non configuré'}
+
+${config.signature || 'Cordialement,\nL\'équipe GPA Assurance'}
+
+---
+Ce devis a été généré par GPA Assurance
+Le ${new Date().toLocaleDateString('fr-FR')}
+Configuration SMTP: ${config.providerName} (${config.host}:${config.port})
+                `;
+                
+                console.log('Sujet:', sujet);
+                console.log('Corps email généré, longueur:', corpsEmail.length);
+                
+                // Solution : Ouvrir la page email-sender.html avec tous les paramètres
+                console.log('Ouverture de la page d\'envoi direct...');
+                
+                // Construire l'URL avec tous les paramètres SMTP
+                const params = new URLSearchParams();
+                params.set('host', config.host);
+                params.set('port', config.port);
+                params.set('username', config.username);
+                params.set('password', config.password);
+                params.set('from', config.from);
+                params.set('to', emailClient);
+                params.set('subject', sujet);
+                params.set('body', corpsEmail);
+                params.set('devisId', devisId);
+                params.set('devisData', encodeURIComponent(JSON.stringify(devis))); // Ajouter les données du devis
+                
+                const emailSenderURL = `email-sender.html?${params.toString()}`;
+                
+                console.log('URL d\'envoi:', emailSenderURL);
+                
+                // Ouvrir la page d'envoi dans une nouvelle fenêtre
+                const emailWindow = window.open(emailSenderURL, '_blank', 'width=700,height=800,scrollbars=yes');
+                
+                if (emailWindow) {
+                    console.log('Fenêtre d\'envoi ouverte');
+                    
+                    // Marquer le devis comme envoyé après un délai
+                    setTimeout(() => {
+                        const index = devisListe.findIndex(d => d.id === devisId);
+                        if (index !== -1) {
+                            devisListe[index].emailEnvoye = true;
+                            devisListe[index].dateEnvoiEmail = new Date().toISOString();
+                            devisListe[index].smtpConfigUsed = {
+                                provider: config.providerName,
+                                host: config.host,
+                                port: config.port,
+                                method: 'direct_sender'
+                            };
+                            localStorage.setItem('devisTestPdf', JSON.stringify(devisListe));
+                            console.log('Devis marqué comme envoyé (méthode direct_sender)');
+                        }
+                        
+                        showStatus('✅ Fenêtre d\'envoi ouverte', 'success');
+                        
+                        // Message de confirmation
+                        setTimeout(() => {
+                            alert('🎉 Fenêtre d\'envoi direct ouverte !\n\nUne nouvelle fenêtre s\'est ouverte avec:\n• La configuration SMTP pré-remplie\n• L\'email complet prêt à envoyer\n• Un bouton "Envoyer" pour l\'envoi direct\n\nConfiguration SMTP utilisée:\n• Fournisseur: ' + config.providerName + '\n• Serveur: ' + config.host + ':' + config.port + '\n• Expéditeur: ' + config.from + '\n• Destinataire: ' + emailClient + '\n\nCliquez sur "Envoyer l\'email" dans la nouvelle fenêtre pour l\'envoi direct.');
+                        }, 1000);
+                        
+                        // Rafraîchir la liste
+                        setTimeout(() => {
+                            chargerDevis();
+                        }, 1500);
+                    }, 1000);
+                    
+                } else {
+                    // Si la popup est bloquée
+                    console.log('Popup bloquée, utilisation du mailto...');
+                    const mailtoLink = `mailto:${emailClient}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corpsEmail)}`;
+                    window.location.href = mailtoLink;
+                    
+                    showStatus('📧 Popup bloquée - Email ouvert', 'warning');
+                }
+                
+            } catch (error) {
+                console.log('ERREUR:', error);
+                showStatus('❌ Erreur : ' + error.message, 'error');
+                
+                setTimeout(() => {
+                    alert('❌ Erreur inattendue\n\nDétail: ' + error.message + '\n\nVeuillez réessayer.');
+                }, 1000);
+            }
+        }
+
+        function supprimerDevis(devisId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce devis ?')) {
+                const devisListe = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                const updatedList = devisListe.filter(devis => devis.id !== devisId);
+                localStorage.setItem('devisTestPdf', JSON.stringify(updatedList));
+                chargerDevis();
+                showStatus('✅ Devis supprimé avec succès', 'success');
+            }
+        }
+
+        function formaterMontant(montant) {
+            if (!montant) return '0,00 €';
+            return new Intl.NumberFormat('fr-FR', { 
+                style: 'currency', 
+                currency: 'EUR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(montant);
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            const statusText = document.getElementById('statusText');
+            
+            if (statusDiv && statusText) {
+                statusDiv.className = `status-message status-${type}`;
+                statusText.textContent = message;
+                statusDiv.style.display = 'flex';
+                
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function loadEmailConfig() {
+            const encrypted = localStorage.getItem('gpa_email_config');
+            if (!encrypted) return null;
+            
+            try {
+                return JSON.parse(decodeURIComponent(escape(atob(encrypted))));
+            } catch (e) {
+                console.error('Erreur lors du déchiffrement de la configuration email:', e);
+                return null;
+            }
+        }
+
+        function chargerDevis() {
+            const devisEnregistres = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+            const devisList = document.getElementById('devis-list');
+            
+            if (!devisList) return;
+            
+            if (!devisEnregistres || devisEnregistres.length === 0) {
+                devisList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>Aucun devis enregistré</h3>
+                        <p>Créez votre premier devis pour le voir apparaître ici.</p>
+                        <a href="test-pdf.html" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Créer un devis
+                        </a>
+                    </div>`;
+                return;
+            }
+            
+            // Trier les devis par date (du plus récent au plus ancien)
+            devisEnregistres.sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation));
+            
+            devisList.innerHTML = devisEnregistres.map(devis => `
+                <div class="devis-card statut-${(devis.statut || 'brouillon').toLowerCase().replace('é', 'e').replace('û', 'u')}">
+                    <div class="devis-header">
+                        <div class="devis-client">${devis.client.nom || ''} ${devis.client.prenom || ''}</div>
+                        <div class="devis-vehicule">${devis.vehicule.marque || ''} ${devis.vehicule.modele || ''}</div>
+                    </div>
+                    <div class="devis-body">
+                        <div class="devis-info">
+                            <div class="info-item">
+                                <span class="info-label">Immatriculation</span>
+                                <span class="info-value">${devis.vehicule.immatriculation || 'Non renseignée'}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Date de création</span>
+                                <span class="info-value">${formaterDate(devis.dateCreation)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Formule</span>
+                                <span class="info-value">${devis.formule || 'Non spécifiée'}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Date d'effet</span>
+                                <span class="info-value">${formaterDate(devis.dateEffet || devis.infosComplementaires?.dateEffet)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Frais de dossier</span>
+                                <span class="info-value">${formaterMontant(devis.infosComplementaires?.fraisDossier || devis.fraisDossier || 0)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Statut</span>
+                                <span class="info-value">
+                                    <select class="status-select" onchange="modifierStatut('${devis.id}', this.value)">
+                                        <option value="Brouillon" ${(devis.statut || 'Brouillon') === 'Brouillon' ? 'selected' : ''}>Brouillon</option>
+                                        <option value="Généré" ${devis.statut === 'Généré' ? 'selected' : ''}>Généré</option>
+                                        <option value="Envoyé" ${devis.statut === 'Envoyé' ? 'selected' : ''}>Envoyé</option>
+                                        <option value="Accepté" ${devis.statut === 'Accepté' ? 'selected' : ''} style="color: #34c759; font-weight: 600;">✅ Accepté</option>
+                                        <option value="Refusé" ${devis.statut === 'Refusé' ? 'selected' : ''} style="color: #ff3b30; font-weight: 600;">❌ Refusé</option>
+                                    </select>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="devis-montant">
+                            ${formaterMontant(devis.infosComplementaires?.cotisation || devis.cotisation || 0)}
+                        </div>
+                    </div>
+                    <div class="devis-actions">
+                        <a href="test-pdf.html?devisId=${devis.id}" class="btn-icon-only btn-icon-view" data-tooltip="Voir">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button class="btn-icon-only btn-icon-send" onclick="envoyerDevisParEmail('${devis.id}', '${devis.client.email || ''}')" data-tooltip="Envoyer">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                        <button class="btn-icon-only btn-icon-download" onclick="telechargerDevis('${devis.id}')" data-tooltip="Télécharger">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                        <button class="btn-icon-only btn-icon-delete" onclick="supprimerDevis('${devis.id}')" data-tooltip="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formaterDate(dateString) {
+            if (!dateString) return '';
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('fr-FR', options);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const devisList = document.getElementById('devis-list');
+            
+            // Fonction pour formater la date au format français
+            function formaterDate(dateString) {
+                if (!dateString) return '';
+                const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                return new Date(dateString).toLocaleDateString('fr-FR', options);
+            }
+            
+            // Fonction pour afficher les devis
+            function afficherDevis(devis) {
+                if (!devis || devis.length === 0) {
+                    devisList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-file-alt"></i>
+                            <h3>Aucun devis enregistré</h3>
+                            <p>Créez votre premier devis pour le voir apparaître ici.</p>
+                            <a href="test-pdf.html" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Créer un devis
+                            </a>
+                        </div>`;
+                    return;
+                }
+                
+                // Trier les devis par date (du plus récent au plus ancien)
+                devis.sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation));
+                
+                devisList.innerHTML = devis.map(devis => `
+                    <div class="devis-card statut-${(devis.statut || 'brouillon').toLowerCase().replace('é', 'e').replace('û', 'u')}">
+                        <div class="devis-header">
+                            <div class="devis-client">${devis.client.nom || ''} ${devis.client.prenom || ''}</div>
+                            <div class="devis-vehicule">${devis.vehicule.marque || ''} ${devis.vehicule.modele || ''}</div>
+                        </div>
+                        <div class="devis-body">
+                            <div class="devis-info">
+                                <div class="info-item">
+                                    <span class="info-label">Immatriculation</span>
+                                    <span class="info-value">${devis.vehicule.immatriculation || 'Non renseignée'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date de création</span>
+                                    <span class="info-value">${formaterDate(devis.dateCreation)}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Formule</span>
+                                    <span class="info-value">${devis.formule || 'Non spécifiée'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date d'effet</span>
+                                    <span class="info-value">${formaterDate(devis.dateEffet || devis.infosComplementaires?.dateEffet)}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Frais de dossier</span>
+                                    <span class="info-value">${formaterMontant(devis.infosComplementaires?.fraisDossier || devis.fraisDossier || 0)}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Statut</span>
+                                    <span class="info-value">
+                                        <select class="status-select" onchange="modifierStatut('${devis.id}', this.value)">
+                                            <option value="Brouillon" ${(devis.statut || 'Brouillon') === 'Brouillon' ? 'selected' : ''} style="color: #ccc;">Brouillon</option>
+                                            <option value="Généré" ${devis.statut === 'Généré' ? 'selected' : ''} style="color: #007bff;">Généré</option>
+                                            <option value="Envoyé" ${devis.statut === 'Envoyé' ? 'selected' : ''} style="color: #28a745;">Envoyé</option>
+                                            <option value="Accepté" ${devis.statut === 'Accepté' ? 'selected' : ''} style="color: #34c759; font-weight: 600;">✅ Accepté</option>
+                                            <option value="Refusé" ${devis.statut === 'Refusé' ? 'selected' : ''} style="color: #ff3b30; font-weight: 600;">❌ Refusé</option>
+                                        </select>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="devis-montant">
+                                ${formaterMontant(devis.infosComplementaires?.cotisation || devis.cotisation || 0)}
+                            </div>
+                        </div>
+                        <div class="devis-actions">
+                            <a href="test-pdf.html?devisId=${devis.id}" class="btn-icon-only btn-icon-view" data-tooltip="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn-icon-only btn-icon-send" onclick="envoyerDevisParEmail('${devis.id}', '${devis.client.email || ''}')" data-tooltip="Envoyer">
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                            <button class="btn-icon-only btn-icon-download" onclick="telechargerDevis('${devis.id}')" data-tooltip="Télécharger">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                            <button class="btn-icon-only btn-icon-delete" onclick="supprimerDevis('${devis.id}')" data-tooltip="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Variables pour la recherche et le filtrage
+            let allDevis = [];
+            let filteredDevis = [];
+            let currentPage = 1;
+            const itemsPerPage = 6;
+            
+            // Fonction pour charger les devis depuis le localStorage
+            function chargerDevis() {
+                const devisEnregistres = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                allDevis = devisEnregistres;
+                filteredDevis = [...allDevis];
+                currentPage = 1;
+                afficherDevis();
+                updateStats();
+            }
+            
+            // Fonction pour filtrer les devis
+            function filtrerDevis() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const statusFilter = document.getElementById('statusFilter').value;
+                const sortBy = document.getElementById('sortBy').value;
+                
+                // Filtrer par terme de recherche
+                filteredDevis = allDevis.filter(devis => {
+                    const searchFields = [
+                        devis.client?.nom || '',
+                        devis.client?.prenom || '',
+                        devis.vehicule?.marque || '',
+                        devis.vehicule?.modele || '',
+                        devis.vehicule?.immatriculation || '',
+                        devis.formule || '',
+                        devis.statut || ''
+                    ].join(' ').toLowerCase();
+                    
+                    const matchesSearch = searchFields.includes(searchTerm);
+                    const matchesStatus = statusFilter === 'all' || (devis.statut || 'Brouillon') === statusFilter;
+                    
+                    return matchesSearch && matchesStatus;
+                });
+                
+                // Trier les devis
+                switch(sortBy) {
+                    case 'date-desc':
+                        filteredDevis.sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation));
+                        break;
+                    case 'date-asc':
+                        filteredDevis.sort((a, b) => new Date(a.dateCreation) - new Date(b.dateCreation));
+                        break;
+                    case 'montant-desc':
+                        filteredDevis.sort((a, b) => (b.cotisation || b.infosComplementaires?.cotisation || 0) - (a.cotisation || a.infosComplementaires?.cotisation || 0));
+                        break;
+                    case 'montant-asc':
+                        filteredDevis.sort((a, b) => (a.cotisation || a.infosComplementaires?.cotisation || 0) - (b.cotisation || b.infosComplementaires?.cotisation || 0));
+                        break;
+                    case 'nom-asc':
+                        filteredDevis.sort((a, b) => `${a.client?.nom || ''} ${a.client?.prenom || ''}`.localeCompare(`${b.client?.nom || ''} ${b.client?.prenom || ''}`));
+                        break;
+                    case 'nom-desc':
+                        filteredDevis.sort((a, b) => `${b.client?.nom || ''} ${b.client?.prenom || ''}`.localeCompare(`${a.client?.nom || ''} ${a.client?.prenom || ''}`));
+                        break;
+                    default:
+                        filteredDevis.sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation));
+                }
+                
+                currentPage = 1;
+                afficherDevis();
+                updatePagination();
+            }
+            
+            // Fonction pour afficher les devis avec pagination
+            function afficherDevis() {
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const devisToShow = filteredDevis.slice(startIndex, endIndex);
+                
+                if (!devisToShow || devisToShow.length === 0) {
+                    devisList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h3>Aucun devis trouvé</h3>
+                            <p>Essayez de modifier vos critères de recherche.</p>
+                            <button class="btn btn-outline" onclick="resetFilters()">
+                                <i class="fas fa-times"></i> Réinitialiser les filtres
+                            </button>
+                        </div>`;
+                    updatePagination();
+                    return;
+                }
+                
+                devisList.innerHTML = devisToShow.map(devis => `
+                    <div class="devis-card statut-${(devis.statut || 'brouillon').toLowerCase().replace('é', 'e').replace('û', 'u')}">
+                        <div class="devis-header">
+                            <div class="devis-client">${devis.client.nom || ''} ${devis.client.prenom || ''}</div>
+                            <div class="devis-vehicule">${devis.vehicule.marque || ''} ${devis.vehicule.modele || ''}</div>
+                        </div>
+                        <div class="devis-body">
+                            <div class="devis-info">
+                                <div class="info-item">
+                                    <span class="info-label">Immatriculation</span>
+                                    <span class="info-value">${devis.vehicule.immatriculation || 'Non renseignée'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date de création</span>
+                                    <span class="info-value">${formaterDate(devis.dateCreation)}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Formule</span>
+                                    <span class="info-value">${devis.formule || 'Non spécifiée'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date d'effet</span>
+                                    <span class="info-value">${formaterDate(devis.dateEffet || devis.infosComplementaires?.dateEffet)}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Frais de dossier</span>
+                                    <span class="info-value">${formaterMontant(devis.infosComplementaires?.fraisDossier || devis.fraisDossier || 0)}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Statut</span>
+                                    <span class="info-value">
+                                        <select class="status-select" onchange="modifierStatut('${devis.id}', this.value)">
+                                            <option value="Brouillon" ${(devis.statut || 'Brouillon') === 'Brouillon' ? 'selected' : ''} style="color: #ccc;">Brouillon</option>
+                                            <option value="Généré" ${devis.statut === 'Généré' ? 'selected' : ''} style="color: #007bff;">Généré</option>
+                                            <option value="Envoyé" ${devis.statut === 'Envoyé' ? 'selected' : ''} style="color: #28a745;">Envoyé</option>
+                                            <option value="Accepté" ${devis.statut === 'Accepté' ? 'selected' : ''} style="color: #34c759; font-weight: 600;">✅ Accepté</option>
+                                            <option value="Refusé" ${devis.statut === 'Refusé' ? 'selected' : ''} style="color: #ff3b30; font-weight: 600;">❌ Refusé</option>
+                                        </select>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="devis-montant">
+                                ${formaterMontant(devis.infosComplementaires?.cotisation || devis.cotisation || 0)}
+                            </div>
+                        </div>
+                        <div class="devis-actions">
+                            <a href="test-pdf.html?devisId=${devis.id}" class="btn-icon-only btn-icon-view" data-tooltip="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn-icon-only btn-icon-send" onclick="envoyerDevisParEmail('${devis.id}', '${devis.client.email || ''}')" data-tooltip="Envoyer">
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                            <button class="btn-icon-only btn-icon-download" onclick="telechargerDevis('${devis.id}')" data-tooltip="Télécharger">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                            <button class="btn-icon-only btn-icon-delete" onclick="supprimerDevis('${devis.id}')" data-tooltip="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                updatePagination();
+            }
+            
+            // Fonction pour mettre à jour la pagination
+            function updatePagination() {
+                const totalPages = Math.ceil(filteredDevis.length / itemsPerPage);
+                const paginationInfo = document.getElementById('paginationInfo');
+                const prevBtn = document.getElementById('prevPage');
+                const nextBtn = document.getElementById('nextPage');
+                const pageNumbers = document.getElementById('pageNumbers');
+                
+                // Mettre à jour le texte d'information
+                const startItem = filteredDevis.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+                const endItem = Math.min(currentPage * itemsPerPage, filteredDevis.length);
+                paginationInfo.textContent = `Affichage ${startItem}-${endItem} sur ${filteredDevis.length} devis`;
+                
+                // Activer/désactiver les boutons
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+                
+                // Générer les numéros de page
+                pageNumbers.innerHTML = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                        const pageBtn = document.createElement('button');
+                        pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+                        pageBtn.textContent = i;
+                        pageBtn.onclick = () => {
+                            currentPage = i;
+                            afficherDevis();
+                        };
+                        pageNumbers.appendChild(pageBtn);
+                    } else if (i === currentPage - 2 || i === currentPage + 2) {
+                        const dots = document.createElement('span');
+                        dots.textContent = '...';
+                        dots.style.padding = '0 0.5rem';
+                        pageNumbers.appendChild(dots);
+                    }
+                }
+            }
+            
+            // Fonction pour réinitialiser les filtres
+            window.resetFilters = function() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('statusFilter').value = 'all';
+                document.getElementById('sortBy').value = 'date-desc';
+                chargerDevis();
+            };
+            
+            // Fonction pour mettre à jour les statistiques
+            function updateStats() {
+                const totalDevis = allDevis.length;
+                const devisRefuses = allDevis.filter(d => d.statut === 'Refusé').length;
+                const devisAcceptes = allDevis.filter(d => d.statut === 'Accepté').length;
+                const chiffreAffaire = allDevis.reduce((total, devis) => {
+                    return total + (devis.infosComplementaires?.fraisDossier || devis.fraisDossier || 0);
+                }, 0);
+                
+                // Calcul du taux de concrétisation : (devis acceptés / total des devis créés) * 100
+                const tauxConcretisation = totalDevis > 0 ? Math.round((devisAcceptes / totalDevis) * 100) : 0;
+                
+                // Appliquer les couleurs au taux de concrétisation
+                const tauxElement = document.getElementById('tauxConcretisation');
+                tauxElement.textContent = tauxConcretisation + '%';
+                
+                // Couleur selon le seuil de 50%
+                if (tauxConcretisation >= 50) {
+                    tauxElement.style.color = '#34c759'; // Vert
+                    tauxElement.style.fontWeight = '600';
+                } else {
+                    tauxElement.style.color = '#ff3b30'; // Rouge
+                    tauxElement.style.fontWeight = '600';
+                }
+                
+                document.getElementById('totalDevis').textContent = totalDevis;
+                document.getElementById('devisRefuses').textContent = devisRefuses;
+                document.getElementById('devisAcceptes').textContent = devisAcceptes;
+                document.getElementById('chiffreAffaire').textContent = formaterMontant(chiffreAffaire);
+            }
+            
+            // Ajouter les écouteurs d'événements pour la recherche et les filtres
+            document.getElementById('searchInput').addEventListener('input', filtrerDevis);
+            document.getElementById('statusFilter').addEventListener('change', filtrerDevis);
+            document.getElementById('sortBy').addEventListener('change', filtrerDevis);
+            
+            // Gestion de la pagination
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    afficherDevis();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredDevis.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    afficherDevis();
+                }
+            });
+            
+            // Charger les devis au chargement de la page
+            chargerDevis();
+            
+            // Fonction pour modifier le statut d'un devis
+            window.modifierStatut = function(devisId, nouveauStatut) {
+                try {
+                    console.log('Modification du statut:', devisId, '->', nouveauStatut);
+                    
+                    // Récupérer la liste des devis
+                    const devisListe = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                    const index = devisListe.findIndex(d => d.id === devisId);
+                    
+                    if (index === -1) {
+                        showStatus('❌ Devis non trouvé', 'error');
+                        return;
+                    }
+                    
+                    // Mettre à jour le statut
+                    const ancienStatut = devisListe[index].statut || 'Brouillon';
+                    devisListe[index].statut = nouveauStatut;
+                    devisListe[index].dateModification = new Date().toISOString();
+                    
+                    // Ajouter un historique des changements de statut
+                    if (!devisListe[index].historiqueStatuts) {
+                        devisListe[index].historiqueStatuts = [];
+                    }
+                    devisListe[index].historiqueStatuts.push({
+                        ancienStatut: ancienStatut,
+                        nouveauStatut: nouveauStatut,
+                        date: new Date().toISOString(),
+                        utilisateur: 'Utilisateur actuel'
+                    });
+                    
+                    // Sauvegarder dans localStorage
+                    localStorage.setItem('devisTestPdf', JSON.stringify(devisListe));
+                    
+                    // Mettre à jour les données locales pour le filtrage
+                    const devisIndex = allDevis.findIndex(d => d.id === devisId);
+                    if (devisIndex !== -1) {
+                        allDevis[devisIndex].statut = nouveauStatut;
+                        allDevis[devisIndex].dateModification = new Date().toISOString();
+                    }
+                    
+                    const filteredIndex = filteredDevis.findIndex(d => d.id === devisId);
+                    if (filteredIndex !== -1) {
+                        filteredDevis[filteredIndex].statut = nouveauStatut;
+                        filteredDevis[filteredIndex].dateModification = new Date().toISOString();
+                    }
+                    
+                    // Afficher un message de succès
+                    showStatus(`✅ Statut modifié : ${ancienStatut} → ${nouveauStatut}`, 'success');
+                    
+                    // Mettre à jour automatiquement la couleur de la carte
+                    const carteElement = document.querySelector(`.devis-card:has(select[onchange*="${devisId}"])`) ||
+                                       document.querySelector(`select[onchange*="${devisId}"]`).closest('.devis-card');
+                    
+                    if (carteElement) {
+                        // Supprimer toutes les classes de statut existantes
+                        carteElement.classList.remove('statut-brouillon', 'statut-genere', 'statut-envoye', 'statut-accepte', 'statut-refuse');
+                        
+                        // Ajouter la nouvelle classe de statut
+                        const nouvelleClasse = `statut-${nouveauStatut.toLowerCase().replace('é', 'e').replace('û', 'u')}`;
+                        carteElement.classList.add(nouvelleClasse);
+                        
+                        console.log('Couleur de la carte mise à jour:', nouvelleClasse);
+                    }
+                    
+                    // Mettre à jour les statistiques
+                    updateStats();
+                    
+                    // Appliquer les filtres actuels pour rafraîchir l'affichage si nécessaire
+                    if (document.getElementById('statusFilter').value !== 'all') {
+                        filtrerDevis();
+                    }
+                    
+                } catch (error) {
+                    console.error('Erreur lors de la modification du statut:', error);
+                    showStatus('❌ Erreur lors de la modification du statut', 'error');
+                }
+            };
+            
+            // Fonction pour télécharger un devis en PDF
+            window.telechargerDevis = function(devisId) {
+                try {
+                    console.log('Téléchargement du devis:', devisId);
+                    
+                    // Récupérer les données du devis
+                    const devisListe = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                    const devis = devisListe.find(d => d.id === devisId);
+                    
+                    if (!devis) {
+                        showStatus('❌ Devis non trouvé', 'error');
+                        return;
+                    }
+                    
+                    // Vérifier que DevisGenerator est disponible
+                    if (typeof DevisGenerator === 'undefined') {
+                        showStatus('❌ Erreur: Le générateur de devis n\'est pas disponible', 'error');
+                        return;
+                    }
+                    
+                    // Afficher un message de chargement
+                    showStatus('📄 Génération du PDF en cours...', 'warning');
+                    
+                    // Préparer les données pour le générateur
+                    const client = devis.client || {};
+                    const prestations = devis.prestations || [];
+                    const infosComplementaires = {
+                        ...devis.infosComplementaires,
+                        vehicule: devis.vehicule || {},
+                        typeAssurance: devis.typeAssurance || devis.infosComplementaires?.typeAssurance || 'tiers',
+                        cotisation: devis.infosComplementaires?.cotisation || devis.cotisation || 0,
+                        dateEffet: devis.dateEffet || devis.infosComplementaires?.dateEffet || new Date().toISOString().split('T')[0],
+                        fractionnement: devis.fractionnement || devis.infosComplementaires?.fractionnement || 'Mensuel',
+                        assistance: devis.assistance || devis.infosComplementaires?.assistance || false,
+                        fraisDossier: devis.fraisDossier || devis.infosComplementaires?.fraisDossier || 0
+                    };
+                    
+                    // Créer une instance du générateur
+                    const devisGenerator = new DevisGenerator();
+                    
+                    // Générer le PDF
+                    setTimeout(() => {
+                        try {
+                            devisGenerator.generateDevis(client, prestations, infosComplementaires);
+                            showStatus('✅ PDF généré avec succès', 'success');
+                        } catch (error) {
+                            console.error('Erreur lors de la génération du PDF:', error);
+                            showStatus('❌ Erreur lors de la génération du PDF: ' + error.message, 'error');
+                        }
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Erreur lors du téléchargement du devis:', error);
+                    showStatus('❌ Erreur: ' + error.message, 'error');
+                }
+            };
+            
+            // Fonction pour supprimer un devis
+            window.supprimerDevis = function(id) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer ce devis ? Cette action est irréversible.')) {
+                    let devisEnregistres = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                    devisEnregistres = devisEnregistres.filter(d => d.id !== id);
+                    localStorage.setItem('devisTestPdf', JSON.stringify(devisEnregistres));
+                    // Recharger les devis pour mettre à jour la liste
+                    chargerDevis();
+                    showStatus('✅ Devis supprimé avec succès', 'success');
+                }
+            };
+            
+            // Fonctions de gestion email
+            function encryptData(data) {
+                return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+            }
+
+            function decryptData(encryptedData) {
+                try {
+                    return JSON.parse(decodeURIComponent(escape(atob(encryptedData))));
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function loadEmailConfig() {
+                const encrypted = localStorage.getItem('gpa_email_config');
+                return encrypted ? decryptData(encrypted) : null;
+            }
+
+            function showStatus(message, type) {
+                // Créer un message de statut temporaire
+                const statusDiv = document.createElement('div');
+                statusDiv.className = `status-message status-${type}`;
+                statusDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 1rem 1.5rem;
+                    border-radius: 8px;
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-weight: 500;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                `;
+                
+                if (type === 'success') {
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.style.border = '1px solid #c3e6cb';
+                } else if (type === 'error') {
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.style.border = '1px solid #f5c6cb';
+                } else {
+                    statusDiv.style.background = '#fff3cd';
+                    statusDiv.style.color = '#856404';
+                    statusDiv.style.border = '1px solid #ffeaa7';
+                }
+                
+                statusDiv.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                document.body.appendChild(statusDiv);
+                
+                setTimeout(() => {
+                    statusDiv.remove();
+                }, 5000);
+            }
+
+            function construireEmailBody(devis) {
+                const config = loadEmailConfig();
+                const client = devis.client || {};
+                const cotisation = devis.infosComplementaires?.cotisation || devis.cotisation || 0;
+                const dateEffet = devis.dateEffet || devis.infosComplementaires?.dateEffet || '-';
+                const typeAssurance = devis.typeAssurance || devis.infosComplementaires?.typeAssurance || '-';
+                
+                return `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <div style="background: #1a365d; color: white; padding: 2rem; text-align: center; border-radius: 8px 8px 0 0;">
+                            <h1 style="margin: 0; font-size: 2rem;">🚗 GPA Assurance</h1>
+                            <p style="margin: 0.5rem 0 0; opacity: 0.9;">Votre devis d'assurance auto</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 2rem; border: 1px solid #e2e8f0; border-top: none;">
+                            <h2 style="color: #1a365d; margin-bottom: 1rem;">Bonjour ${client.prenom || client.nom || 'Client'},</h2>
+                            
+                            <p style="margin-bottom: 1.5rem; line-height: 1.6;">
+                                Merci de votre confiance pour votre assurance automobile. 
+                                Vous trouverez ci-joint votre devis personnalisé pour votre véhicule.
+                            </p>
+                            
+                            <div style="background: #f7fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                                <h3 style="color: #1a365d; margin-bottom: 1rem;">📋 Récapitulatif de votre devis</h3>
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 0.5rem 0; font-weight: 500; color: #4a5568;">Client :</td>
+                                        <td style="padding: 0.5rem 0; text-align: right;">${client.nom || ''} ${client.prenom || ''}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 0.5rem 0; font-weight: 500; color: #4a5568;">Véhicule :</td>
+                                        <td style="padding: 0.5rem 0; text-align: right;">${devis.vehicule?.marque || ''} ${devis.vehicule?.modele || ''}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 0.5rem 0; font-weight: 500; color: #4a5568;">Formule :</td>
+                                        <td style="padding: 0.5rem 0; text-align: right;">${typeAssurance}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 0.5rem 0; font-weight: 500; color: #4a5568;">Date d'effet :</td>
+                                        <td style="padding: 0.5rem 0; text-align: right;">${dateEffet}</td>
+                                    </tr>
+                                    <tr style="border-top: 2px solid #e2e8f0;">
+                                        <td style="padding: 1rem 0 0.5rem; font-weight: 600; color: #1a365d; font-size: 1.1rem;">Cotisation annuelle :</td>
+                                        <td style="padding: 1rem 0 0.5rem; text-align: right; font-weight: 600; color: #27ae60; font-size: 1.1rem;">${formaterMontant(cotisation)}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 2rem;">
+                                <p style="margin-bottom: 1rem; color: #4a5568;">
+                                    N'hésitez pas à nous contacter pour toute question ou pour finaliser votre contrat.
+                                </p>
+                                <p style="margin-bottom: 0; color: #1a365d; font-weight: 500;">
+                                    📞 Appelez-nous : ${config.phoneNumber || 'Numéro non configuré'}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 1.5rem; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px; text-align: center;">
+                            <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">
+                                ${config.signature || 'Cordialement,<br>L\'équipe GPA Assurance'}
+                            </p>
+                            <p style="margin: 0.5rem 0 0; color: #6c757d; font-size: 0.8rem;">
+                                Ce devis a été généré par GPA Assurance le ${new Date().toLocaleDateString('fr-FR')}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+                            
+            // Fonction pour afficher les détails d'un devis dans la modal
+            function afficherDetailsDevis(devisId) {
+                const devisEnregistres = JSON.parse(localStorage.getItem('devisTestPdf') || '[]');
+                const devis = devisEnregistres.find(d => d.id === devisId);
+                
+                if (!devis) {
+                    showStatus('❌ Devis non trouvé', 'error');
+                    return;
+                }
+
+                const modalDetails = document.getElementById('devis-details');
+                const client = devis.client || {};
+                const vehicule = devis.vehicule || {};
+                const cotisation = devis.infosComplementaires?.cotisation || devis.cotisation || 0;
+                const fraisDossier = devis.fraisDossier || 0;
+                const dateEffet = devis.dateEffet || devis.infosComplementaires?.dateEffet;
+                const typeAssurance = devis.typeAssurance || devis.infosComplementaires?.typeAssurance || 'Non spécifiée';
+                const assistance = devis.assistance || false;
+                const fractionnement = devis.fractionnement || 'Mensuel';
+                
+                modalDetails.innerHTML = `
+                    <div class="devis-detail-content">
+                        <h3>Détails du devis #${devis.id}</h3>
+                        <div class="detail-section">
+                            <h4>Informations client</h4>
+                            <p><strong>Nom:</strong> ${client.nom || ''} ${client.prenom || ''}</p>
+                            <p><strong>Email:</strong> ${client.email || 'Non renseigné'}</p>
+                            <p><strong>Téléphone:</strong> ${client.telephone || 'Non renseigné'}</p>
+                            <p><strong>Adresse:</strong> ${client.adresse || 'Non renseignée'}</p>
+                            <div class="detail-item">
+                                <label>Code postal</label>
+                                <div class="value">${client.codePostal || '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Ville</label>
+                                <div class="value">${client.ville || '-'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Informations Véhicule</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Marque</label>
+                                <div class="value">${vehicule.marque || '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Modèle</label>
+                                <div class="value">${vehicule.modele || '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Immatriculation</label>
+                                <div class="value">${vehicule.immatriculation || '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Date 1ère MEC</label>
+                                <div class="value">${vehicule.dateMec ? formaterDate(vehicule.dateMec) : '-'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Tarification</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item montant-cotisation">
+                                <label>Cotisation annuelle</label>
+                                <div class="value">${cotisation ? formaterMontant(cotisation) : '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Frais de dossier</label>
+                                <div class="value">${fraisDossier ? formaterMontant(fraisDossier) : '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Mode de paiement</label>
+                                <div class="value">${fractionnement}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Date d'effet</label>
+                                <div class="value">${dateEffet ? formaterDate(dateEffet) : '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Type d'assurance</label>
+                                <div class="value">${typeAssurance}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Assistance</label>
+                                <div class="value">${assistance ? 'Oui' : 'Non'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Informations générales</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Date de création</label>
+                                <div class="value">${formaterDate(devis.dateCreation)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Montant total</label>
+                                <div class="value">${formaterMontant(devis.montantTotal || 0)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Afficher la modal
+                const modal = document.getElementById('devis-modal');
+                modal.style.display = 'block';
+                
+                // Ajouter les écouteurs d'événements pour la modal
+                setupModalListeners(devis);
+            }
+            
+            // Fonction pour configurer les écouteurs d'événements de la modal
+            function setupModalListeners(devis) {
+                const modal = document.getElementById('devis-modal');
+                const closeBtn = document.querySelector('.close');
+                const closeBtnFooter = document.querySelector('.close-modal');
+                
+                // Fermer la modal
+                const closeModal = () => {
+                    modal.style.display = 'none';
+                };
+                
+                closeBtn.onclick = closeModal;
+                closeBtnFooter.onclick = closeModal;
+                
+                // Fermer en cliquant à l'extérieur
+                window.onclick = (event) => {
+                    if (event.target === modal) {
+                        closeModal();
+                    }
+                };
+            }
+            
+            // Ajouter les écouteurs d'événements pour les boutons "Voir"
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-voir')) {
+                    e.preventDefault();
+                    const devisId = e.target.closest('.btn-voir').getAttribute('data-id');
+                    afficherDetailsDevis(devisId);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+Solution : Dans la console, tapez :
+localStorage.setItem('gpa_email_templates', JSON.stringify([{'id':'devis-standard','name':'Devis standard','type':'devis','subject':'Votre devis assurance auto','body':'Bonjour {prenom_client},\\n\\nVoici votre devis...'}]))

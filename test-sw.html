@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Service Worker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test du Service Worker</h1>
+    
+    <div id="sw-status" class="status">
+        <h3>État du Service Worker : <span id="sw-state">Vérification en cours...</span></h3>
+    </div>
+    
+    <div id="notification-status" class="status">
+        <h3>Permission de notification : <span id="notification-permission">Vérification en cours...</span></h3>
+        <button id="request-permission" disabled>Demander la permission</button>
+        <button id="test-notification" disabled>Tester la notification</button>
+    </div>
+    
+    <div>
+        <h3>Actions</h3>
+        <button id="unregister-sw">Désenregistrer le Service Worker</button>
+        <button id="clear-cache">Vider le cache</button>
+    </div>
+    
+    <div>
+        <h3>Journal</h3>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const log = (message, type = 'info') => {
+            const logElement = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            
+            if (type === 'error') {
+                entry.style.color = '#dc3545';
+            } else if (type === 'success') {
+                entry.style.color = '#28a745';
+            } else if (type === 'warning') {
+                entry.style.color = '#ffc107';
+            }
+            
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+        };
+
+        // Vérifier le statut du Service Worker
+        const checkServiceWorker = async () => {
+            if (!('serviceWorker' in navigator)) {
+                document.getElementById('sw-state').textContent = 'Non supporté';
+                document.getElementById('sw-status').className = 'status error';
+                log('Service Worker non supporté par ce navigateur', 'error');
+                return false;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    document.getElementById('sw-state').textContent = 'Enregistré';
+                    document.getElementById('sw-status').className = 'status success';
+                    log(`Service Worker enregistré avec succès (scope: ${registration.scope})`, 'success');
+                    return true;
+                } else {
+                    document.getElementById('sw-state').textContent = 'Non enregistré';
+                    document.getElementById('sw-status').className = 'status warning';
+                    log('Aucun Service Worker enregistré', 'warning');
+                    return false;
+                }
+            } catch (error) {
+                document.getElementById('sw-state').textContent = 'Erreur';
+                document.getElementById('sw-status').className = 'status error';
+                log(`Erreur lors de la vérification du Service Worker: ${error.message}`, 'error');
+                return false;
+            }
+        };
+
+        // Vérifier la permission de notification
+        const checkNotificationPermission = () => {
+            if (!('Notification' in window)) {
+                document.getElementById('notification-permission').textContent = 'Non supporté';
+                document.getElementById('notification-status').className = 'status error';
+                log('Notifications non supportées par ce navigateur', 'error');
+                return false;
+            }
+
+            const permission = Notification.permission;
+            updateNotificationUI(permission);
+            return permission === 'granted';
+        };
+
+        const updateNotificationUI = (permission) => {
+            const permissionElement = document.getElementById('notification-permission');
+            const notificationStatus = document.getElementById('notification-status');
+            const requestButton = document.getElementById('request-permission');
+            const testButton = document.getElementById('test-notification');
+
+            permissionElement.textContent = permission;
+            
+            if (permission === 'granted') {
+                notificationStatus.className = 'status success';
+                requestButton.disabled = true;
+                testButton.disabled = false;
+                log('Permission de notification accordée', 'success');
+            } else if (permission === 'denied') {
+                notificationStatus.className = 'status error';
+                requestButton.disabled = true;
+                testButton.disabled = true;
+                log('Permission de notification refusée', 'error');
+            } else {
+                notificationStatus.className = 'status warning';
+                requestButton.disabled = false;
+                testButton.disabled = true;
+                log('Permission de notification non définie', 'warning');
+            }
+        };
+
+        // Demander la permission de notification
+        document.getElementById('request-permission').addEventListener('click', async () => {
+            try {
+                const permission = await Notification.requestPermission();
+                updateNotificationUI(permission);
+                
+                if (permission === 'granted') {
+                    log('Notification de test envoyée avec succès', 'success');
+                    showTestNotification();
+                }
+            } catch (error) {
+                log(`Erreur lors de la demande de permission: ${error.message}`, 'error');
+            }
+        });
+
+        // Tester la notification
+        document.getElementById('test-notification').addEventListener('click', () => {
+            showTestNotification();
+        });
+
+        const showTestNotification = () => {
+            if (Notification.permission === 'granted') {
+                try {
+                    const notification = new Notification('Test de notification', {
+                        body: 'Ceci est une notification de test',
+                        icon: 'icon-192x192.png',
+                        vibrate: [200, 100, 200, 100, 200, 100, 200],
+                        requireInteraction: true
+                    });
+                    
+                    notification.onclick = () => {
+                        log('Notification cliquée', 'info');
+                        window.focus();
+                        notification.close();
+                    };
+                    
+                    log('Notification de test affichée', 'success');
+                } catch (error) {
+                    log(`Erreur lors de l'affichage de la notification: ${error.message}`, 'error');
+                }
+            }
+        };
+
+        // Désenregistrer le Service Worker
+        document.getElementById('unregister-sw').addEventListener('click', async () => {
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    await registration.unregister();
+                    log('Service Worker désenregistré avec succès', 'success');
+                    await checkServiceWorker();
+                } else {
+                    log('Aucun Service Worker à désenregistrer', 'warning');
+                }
+            } catch (error) {
+                log(`Erreur lors du désenregistrement du Service Worker: ${error.message}`, 'error');
+            }
+        });
+
+        // Vider le cache
+        document.getElementById('clear-cache').addEventListener('click', async () => {
+            try {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+                log('Cache vidé avec succès', 'success');
+            } catch (error) {
+                log(`Erreur lors de la suppression du cache: ${error.message}`, 'error');
+            }
+        });
+
+        // Initialisation
+        (async () => {
+            log('Initialisation du test...', 'info');
+            
+            // Vérifier le Service Worker
+            const hasSW = await checkServiceWorker();
+            
+            // Si pas de Service Worker, essayer d'en enregistrer un
+            if (!hasSW) {
+                try {
+                    log('Tentative d\'enregistrement du Service Worker...', 'info');
+                    await navigator.serviceWorker.register('sw.js');
+                    log('Service Worker enregistré avec succès', 'success');
+                    await checkServiceWorker();
+                } catch (error) {
+                    log(`Échec de l'enregistrement du Service Worker: ${error.message}`, 'error');
+                }
+            }
+            
+            // Vérifier la permission de notification
+            checkNotificationPermission();
+            
+            // Activer les boutons
+            document.getElementById('request-permission').disabled = false;
+            document.getElementById('test-notification').disabled = Notification.permission !== 'granted';
+            
+            // Écouter les changements de permission
+            if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(updateNotificationUI);
+            }
+            
+            log('Test prêt', 'success');
+        })();
+    </script>
+</body>
+</html>

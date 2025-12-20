@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Génération de devis - GPA Assurance Auto</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Police Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;    /* Bleu marine */
+            --secondary-color: #ed8936;  /* Orange */
+            --accent-color: #2c5282;     /* Bleu plus clair */
+            --text-color: #2d3748;
+            --light-gray: #f7fafc;
+            --medium-gray: #e2e8f0;
+            --dark-gray: #4a5568;
+            --success-color: #38a169;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #f6f9fc 0%, #f0f4f8 100%);
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header-subtitle {
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .form-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 2.5rem;
+            margin-top: 1rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        h2.section-title {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group label i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+            width: 20px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-gray);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.2);
+        }
+
+        button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 1.5rem 0;
+            width: 100%;
+            max-width: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .section {
+            background-color: white;
+            padding: 1.8rem;
+            border-radius: 10px;
+            margin-bottom: 1.8rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .section:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            position: relative;
+            padding-left: 2rem;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 24px;
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .section-title i {
+            margin-right: 0.8rem;
+            color: var(--secondary-color);
+            font-size: 1.2em;
+        }
+
+        /* Styles pour les champs de formulaire */
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '\f107';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--primary-color);
+        }
+
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 2.5rem !important;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        /* Styles pour les checkboxes personnalisées */
+        .checkbox-container {
+            margin: 1rem 0;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .checkbox-input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkbox-custom {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid var(--medium-gray);
+            border-radius: 4px;
+            margin-right: 10px;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox-input:checked ~ .checkbox-custom {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .checkbox-input:checked ~ .checkbox-custom::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+        }
+
+        .checkbox-text {
+            line-height: 1.4;
+        }
+
+        /* Styles pour le bouton principal */
+        .btn-primary, .btn-test {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26, 54, 93, 0.2);
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 0.5rem auto;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+        }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            color: white;
+        }
+        
+        .btn-test:hover {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 54, 93, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 54, 93, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary i {
+            font-size: 1.2em;
+        }
+
+        /* Styles pour le texte d'information */
+        .text-muted {
+            color: var(--dark-gray);
+            opacity: 0.8;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .text-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .text-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        /* Styles pour les champs de formulaire */
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            padding: 1rem !important;
+            line-height: 1.5;
+        }
+
+        /* Animation de chargement */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Génération de devis</h1>
+            <div class="header-subtitle">GPA Assurance Auto - Votre partenaire confiance</div>
+        </header>
+        
+        <div class="form-container">
+            <!-- Section Informations client -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-user"></i> Informations client
+                </h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nom"><i class="fas fa-user-tag"></i> Nom *</label>
+                        <input type="text" id="nom" required placeholder="Votre nom">
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom"><i class="fas fa-user"></i> Prénom *</label>
+                        <input type="text" id="prenom" required placeholder="Votre prénom">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adresse"><i class="fas fa-map-marker-alt"></i> Adresse *</label>
+                    <input type="text" id="adresse" required placeholder="Votre adresse complète">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="codePostal"><i class="fas fa-mail-bulk"></i> Code postal *</label>
+                        <input type="text" id="codePostal" required placeholder="75000">
+                    </div>
+                    <div class="form-group">
+                        <label for="ville"><i class="fas fa-city"></i> Ville *</label>
+                        <input type="text" id="ville" required placeholder="Votre ville">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telephone"><i class="fas fa-phone"></i> Téléphone *</label>
+                        <input type="tel" id="telephone" required placeholder="06 12 34 56 78">
+                    </div>
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email *</label>
+                        <input type="email" id="email" required placeholder="votre@email.com">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Détails du véhicule -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-car"></i> Détails du véhicule
+                </h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="marque"><i class="fas fa-tag"></i> Marque *</label>
+                        <input type="text" id="marque" required placeholder="Ex: Renault">
+                    </div>
+                    <div class="form-group">
+                        <label for="modele"><i class="fas fa-car-side"></i> Modèle *</label>
+                        <input type="text" id="modele" required placeholder="Ex: Clio">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="annee"><i class="fas fa-calendar-alt"></i> Année *</label>
+                        <input type="number" id="annee" min="1900" max="2025" required placeholder="2023">
+                    </div>
+                    <div class="form-group">
+                        <label for="immatriculation"><i class="fas fa-id-card"></i> Immatriculation *</label>
+                        <input type="text" id="immatriculation" required placeholder="AA-123-AA">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="puissance"><i class="fas fa-tachometer-alt"></i> Puissance fiscale (CV) *</label>
+                    <input type="number" id="puissance" min="1" max="50" required placeholder="5">
+                </div>
+            </div>
+
+            <!-- Section Options d'assurance -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-shield-alt"></i> Options d'assurance
+                </h2>
+                
+                <div class="form-group">
+                    <label for="typeAssurance"><i class="fas fa-clipboard-check"></i> Type d'assurance *</label>
+                    <div class="select-wrapper">
+                        <select id="typeAssurance" required>
+                            <option value="" disabled selected>Sélectionnez un type d'assurance</option>
+                            <option value="tous_risques">Tous risques - Protection complète</option>
+                            <option value="tiers">Tiers - Couverture minimale légale</option>
+                            <option value="tiers_vol_incendie">Tiers, vol et incendie - Protection intermédiaire</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="franchise"><i class="fas fa-euro-sign"></i> Franchise *</label>
+                        <div class="select-wrapper">
+                            <select id="franchise" required>
+                                <option value="200">200 € (Prime plus élevée)</option>
+                                <option value="300" selected>300 €</option>
+                                <option value="400">400 €</option>
+                                <option value="500">500 € (Prime plus basse)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-question-circle"></i> Options supplémentaires</label>
+                        <div class="checkbox-container">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assistance" class="checkbox-input">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-text">Assistance 0km (+12,50€/mois)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateEffet"><i class="far fa-calendar-alt"></i> Date d'effet souhaitée *</label>
+                    <input type="date" id="dateEffet" required min="">
+                </div>
+            </div>
+
+            <!-- Section Commentaires -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-comments"></i> Commentaires supplémentaires
+                </h2>
+                <div class="form-group">
+                    <label for="commentaires"><i class="fas fa-edit"></i> Avez-vous des demandes particulières ?</label>
+                    <textarea id="commentaires" rows="4" placeholder="Précisez ici toute information complémentaire ou demande particulière..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-container">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="conditions" class="checkbox-input" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">J'accepte les <a href="#" class="text-link">conditions générales</a> et la <a href="#" class="text-link">politique de confidentialité</a> *</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                    <button type="button" id="remplirTest" class="btn btn-test">
+                        <i class="fas fa-vial"></i> Remplir avec des données de test
+                    </button>
+                    <button type="button" id="genererDevis" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Générer mon devis
+                    </button>
+                </div>
+                
+                <p class="text-muted text-center">
+                    <small>Vos informations sont sécurisées et ne seront pas partagées sans votre accord.</small>
+                </p>
+            </div>
+
+    <script src="devis-structure.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Définir la date minimale pour la date d'effet (demain)
+            const dateEffet = document.getElementById('dateEffet');
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // Formater la date au format YYYY-MM-DD
+            const yyyy = tomorrow.getFullYear();
+            const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const dd = String(tomorrow.getDate()).padStart(2, '0');
+            const minDate = `${yyyy}-${mm}-${dd}`;
+            
+            dateEffet.min = minDate;
+            dateEffet.value = minDate;
+            
+            // Gérer la soumission du formulaire
+            const form = document.querySelector('.form-container');
+            const submitBtn = document.getElementById('genererDevis');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Vérifier si les conditions sont acceptées
+                if (!document.getElementById('conditions').checked) {
+                    alert('Veuillez accepter les conditions générales pour continuer.');
+                    return;
+                }
+                
+                // Désactiver le bouton et afficher l'animation de chargement
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading"></span> Génération en cours...';
+                
+                // Simuler un délai pour la génération du PDF
+                setTimeout(() => {
+                    // Récupérer les valeurs du formulaire
+                    const client = {
+                        nom: document.getElementById('nom').value.trim(),
+                        prenom: document.getElementById('prenom').value.trim(),
+                        adresse: document.getElementById('adresse').value.trim(),
+                        codePostal: document.getElementById('codePostal').value.trim(),
+                        ville: document.getElementById('ville').value.trim(),
+                        telephone: document.getElementById('telephone').value.trim(),
+                        email: document.getElementById('email').value.trim()
+                    };
+
+                    const typeAssurance = document.getElementById('typeAssurance').value;
+                    const assistance = document.getElementById('assistance').checked;
+                    const franchise = document.getElementById('franchise').value;
+                    const marque = document.getElementById('marque').value.trim();
+                    const modele = document.getElementById('modele').value.trim();
+                    const annee = document.getElementById('annee').value;
+                    const puissance = document.getElementById('puissance').value;
+                    const commentaires = document.getElementById('commentaires').value.trim();
+                    const dateEffetValue = document.getElementById('dateEffet').value;
+
+                    // Valider les champs obligatoires
+                    if (!client.nom || !client.prenom || !client.adresse || !client.codePostal || 
+                        !client.ville || !client.telephone || !client.email || !marque || !modele || 
+                        !annee || !puissance || typeAssurance === '') {
+                        
+                        alert('Veuillez remplir tous les champs obligatoires marqués d\'un astérisque (*)');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+
+                    // Calculer les prestations en fonction des options sélectionnées
+                    const prestations = [];
+                    
+                    // Ajouter l'assurance de base avec prix basé sur la puissance fiscale
+                    let prixAssurance = 0;
+                    const puissanceNum = parseInt(puissance) || 5; // Valeur par défaut si non définie
+                    const coefficientPuissance = 1 + (puissanceNum - 5) * 0.1; // +10% par CV au-dessus de 5
+                    
+                    switch(typeAssurance) {
+                        case 'tous_risques':
+                            prixAssurance = 45.00 * coefficientPuissance;
+                            prestations.push({
+                                designation: `Assurance Tous Risques (${puissance} CV)`,
+                                description: 'Garantie complète incluant la responsabilité civile, le vol, l\'incendie, le bris de glace et les dommages tous accidents.',
+                                prixUnitaire: prixAssurance,
+                                quantite: 1
+                            });
+                            break;
+                        case 'tiers':
+                            prixAssurance = 25.00 * coefficientPuissance;
+                            prestations.push({
+                                designation: `Assurance au Tiers (${puissance} CV)`,
+                                description: 'Garantie responsabilité civile obligatoire couvrant les dommages causés aux tiers.',
+                                prixUnitaire: prixAssurance,
+                                quantite: 1
+                            });
+                            break;
+                        case 'tiers_vol_incendie':
+                            prixAssurance = 35.00 * coefficientPuissance;
+                            prestations.push({
+                                designation: `Assurance Tiers, Vol et Incendie (${puissance} CV)`,
+                                description: 'Garantie responsabilité civile obligatoire + protection contre le vol et l\'incendie.',
+                                prixUnitaire: prixAssurance,
+                                quantite: 1
+                            });
+                            break;
+                    }
+
+                    // Ajouter l'assistance si sélectionnée
+                    if (assistance) {
+                        prestations.push({
+                            designation: 'Assistance 0km',
+                            description: 'Assistance dépannage et remorquage 24h/24 et 7j/7, partout en France et en Europe.',
+                            prixUnitaire: 12.50,
+                            quantite: 1
+                        });
+                    }
+
+                    // Ajouter les frais de dossier
+                    prestations.push({
+                        designation: 'Frais de dossier',
+                        description: 'Frais administratifs de traitement de votre dossier.',
+                        prixUnitaire: 25.00,
+                        quantite: 1
+                    });
+
+                    // Ajouter une réduction pour les nouveaux clients (exemple)
+                    const estNouveauClient = true; // À remplacer par une logique réelle
+                    if (estNouveauClient) {
+                        const reduction = prixAssurance * 0.10; // 10% de réduction
+                        if (reduction > 0) {
+                            prestations.push({
+                                designation: 'Réduction nouveau client',
+                                description: 'Remise spéciale de bienvenue de 10% sur votre première souscription.',
+                                prixUnitaire: -reduction,
+                                quantite: 1
+                            });
+                        }
+                    }
+
+                    // Ajouter les informations complémentaires
+                    const infosComplementaires = {
+                        vehicule: {
+                            marque: marque,
+                            modele: modele,
+                            annee: annee,
+                            immatriculation: document.getElementById('immatriculation').value.trim(),
+                            puissance: puissance,
+                            franchise: franchise
+                        },
+                        dateEffet: dateEffetValue,
+                        commentaires: commentaires
+                    };
+
+                    // Générer le devis
+                    try {
+                        console.log('Début de la génération du devis...');
+                        console.log('Données du client :', client);
+                        console.log('Prestations :', prestations);
+                        console.log('Infos complémentaires :', infosComplementaires);
+                        
+                        // Vérifier si jsPDF est chargé
+                        if (typeof jspdf === 'undefined') {
+                            throw new Error('La bibliothèque jsPDF n\'est pas chargée correctement');
+                        }
+                        
+                        // Créer une instance du générateur de devis
+                        const devisGenerator = new DevisGenerator();
+                        console.log('Instance DevisGenerator créée');
+                        
+                        // Générer le PDF
+                        devisGenerator.generateDevis(client, prestations, infosComplementaires);
+                        console.log('Méthode generateDevis appelée avec succès');
+                        
+                        // Réinitialiser le bouton
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        
+                        // Afficher un message de succès
+                        alert('Votre devis a été généré avec succès !');
+                    } catch (error) {
+                        console.error('ERREUR lors de la génération du devis :', error);
+                        console.error('Détails de l\'erreur :', {
+                            message: error.message,
+                            name: error.name,
+                            stack: error.stack
+                        });
+                        alert('Une erreur est survenue lors de la génération du devis : ' + error.message);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    }
+                }, 1500); // Délai simulé pour la génération
+            });
+            
+            // Gérer le clic sur le bouton de génération de devis
+            document.getElementById('genererDevis').addEventListener('click', function() {
+                form.dispatchEvent(new Event('submit'));
+            });
+            
+            // Remplir le formulaire avec des données de test
+            document.getElementById('remplirTest').addEventListener('click', function() {
+                // Informations client
+                document.getElementById('nom').value = 'Dupont';
+                document.getElementById('prenom').value = 'Jean';
+                document.getElementById('adresse').value = '15 Rue des Exemples';
+                document.getElementById('codePostal').value = '75001';
+                document.getElementById('ville').value = 'Paris';
+                document.getElementById('telephone').value = '0612345678';
+                document.getElementById('email').value = 'jean.dupont@example.com';
+                
+                // Informations véhicule
+                document.getElementById('marque').value = 'Renault';
+                document.getElementById('modele').value = 'Clio V';
+                document.getElementById('annee').value = '2020';
+                document.getElementById('puissance').value = '5';
+                document.getElementById('immatriculation').value = 'AB-123-CD';
+                
+                // Options d'assurance
+                document.getElementById('typeAssurance').value = 'tous_risques';
+                document.getElementById('assistance').checked = true;
+                document.getElementById('franchise').value = '500';
+                
+                // Commentaires
+                document.getElementById('commentaires').value = 'Je souhaite souscrire à l\'assurance tous risques avec assistance.';
+                
+                // Accepter les conditions
+                document.getElementById('conditions').checked = true;
+                
+                // Définir la date d'effet à demain
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const yyyy = tomorrow.getFullYear();
+                const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+                const dd = String(tomorrow.getDate()).padStart(2, '0');
+                document.getElementById('dateEffet').value = `${yyyy}-${mm}-${dd}`;
+                
+                // Faire défiler vers le haut du formulaire
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Afficher un message
+                alert('Formulaire rempli avec des données de test. Vous pouvez maintenant générer le devis.');
+            });
+            
+            // Remplir le formulaire avec des données de test
+            document.getElementById('remplirTest').addEventListener('click', function() {
+                // Informations client
+                document.getElementById('nom').value = 'Dupont';
+                document.getElementById('prenom').value = 'Jean';
+                document.getElementById('adresse').value = '15 Rue des Exemples';
+                document.getElementById('codePostal').value = '75001';
+                document.getElementById('ville').value = 'Paris';
+                document.getElementById('telephone').value = '0612345678';
+                document.getElementById('email').value = 'jean.dupont@example.com';
+                
+                // Informations véhicule
+                document.getElementById('marque').value = 'Renault';
+                document.getElementById('modele').value = 'Clio V';
+                document.getElementById('annee').value = '2020';
+                document.getElementById('puissance').value = '5';
+                document.getElementById('immatriculation').value = 'AB-123-CD';
+                
+                // Options d'assurance
+                document.getElementById('typeAssurance').value = 'tous_risques';
+                document.getElementById('assistance').checked = true;
+                document.getElementById('franchise').value = '500';
+                
+                // Commentaires
+                document.getElementById('commentaires').value = 'Je souhaite souscrire à l\'assurance tous risques avec assistance.';
+                
+                // Accepter les conditions
+                document.getElementById('conditions').checked = true;
+                
+                // Définir la date d'effet à demain
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const yyyy = tomorrow.getFullYear();
+                const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+                const dd = String(tomorrow.getDate()).padStart(2, '0');
+                document.getElementById('dateEffet').value = `${yyyy}-${mm}-${dd}`;
+                
+                // Faire défiler vers le haut du formulaire
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Afficher un message
+                alert('Formulaire rempli avec des données de test. Vous pouvez maintenant générer le devis.');
+            });
+        });
+    </script>
+</body>
+</html>
